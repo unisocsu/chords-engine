@@ -28,7 +28,7 @@ def fetch(url: str) -> bytes:
 
 def main():
     if not CLI.exists():
-        print("מוריד whisper.cpp", WHISPER_TAG)
+        print("Downloading whisper.cpp", WHISPER_TAG)
         data = fetch(WHISPER_ZIP)
         if not data.startswith(b"PK"):
             sys.exit("ההורדה של whisper.cpp נחסמה (נטפרי?). צריך להוריד ידנית: " + WHISPER_ZIP)
