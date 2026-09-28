@@ -37,20 +37,20 @@ jobs:
         run: python -m pip install -r requirements.txt pyinstaller
       - name: Prepare whisper.cpp and model
         env:
-          CHORDS_MODEL: ${{ }}
-          CHORDS_MODEL_SIZE: ${{ }}
+          CHORDS_MODEL: ${{ matrix.model }}
+          CHORDS_MODEL_SIZE: ${{ matrix.size }}
         run: python scripts/setup_vendor.py
       - name: Build EXE
         env:
-          CHORDS_MODEL: ${{ }}
+          CHORDS_MODEL: ${{ matrix.model }}
         run: python build_tools/build_exe.py --skip-pyi
       - name: Rename EXE
         shell: pwsh
-        run: Rename-Item release/Chords.exe release/Chords-${{ }}.exe
+        run: Rename-Item release/Chords.exe release/Chords-${{ matrix.name }}.exe
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Chords-Windows-${{ }}
-          path: release/Chords-${{ }}.exe
+          name: Chords-Windows-${{ matrix.name }}
+          path: release/Chords-${{ matrix.model }}.exe
           if-no-files-found: error
           retention-days: 14
