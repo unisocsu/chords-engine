@@ -50,7 +50,7 @@ def pyinstaller():
 
 
 def vendor():
-    step("whisper.cpp + מודל")
+    step("whisper.cpp + model")
     src = ROOT / "vendor"
     wdst = DIST / "vendor" / "whisper" / "Release"
     wdst.mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def pack() -> Path:
 
 
 def launcher(payload: Path):
-    step("משגר")
+    step("launcher")
     exe = BUILD / "launcher.exe"
     subprocess.run([str(CSC), "/nologo", "/target:winexe", "/optimize+", f"/out:{exe}",
                     "/r:System.IO.Compression.dll", "/r:System.IO.Compression.FileSystem.dll",
