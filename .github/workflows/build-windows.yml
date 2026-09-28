@@ -7,31 +7,50 @@ on:
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: tiny
+            model: ggml-tiny-q5_1.bin
+            size: "200000000"
+          - name: base
+            model: ggml-base-q5_1.bin
+            size: "300000000"
+          - name: small
+            model: ggml-small-q5_1.bin
+            size: "500000000"
+          - name: medium
+            model: ggml-medium-q5_0.bin
+            size: "539000000"
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-
       - name: Install dependencies
         run: python -m pip install -r requirements.txt pyinstaller
-
-      - name: Prepare whisper.cpp and medium model
+      - name: Prepare whisper.cpp and model
+        env:
+          CHORDS_MODEL: ${{ }}
+          CHORDS_MODEL_SIZE: ${{ }}
         run: python scripts/setup_vendor.py
-
       - name: Build EXE
+        env:
+          CHORDS_MODEL: ${{ }}
         run: python build_tools/build_exe.py --skip-pyi
-
+      - name: Rename EXE
+        shell: pwsh
+        run: Rename-Item release/Chords.exe release/Chords-${{ }}.exe
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Chords-Windows-medium
-          path: release/Chords.exe
+          name: Chords-Windows-${{ }}
+          path: release/Chords-${{ }}.exe
           if-no-files-found: error
           retention-days: 14
