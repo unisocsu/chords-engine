@@ -37,7 +37,7 @@ def main():
     MODEL.parent.mkdir(parents=True, exist_ok=True)
     if not MODEL_Q.exists():
         if not MODEL.exists() or MODEL.stat().st_size != MODEL_SIZE:
-            print("מוריד את מודל העברית (1.6GB) — אפשר לעצור ולהמשיך מאוחר יותר")
+        print(f"Downloading model {MODEL_NAME} - resumable")
             # curl יודע להמשיך הורדה שנקטעה (-C -); זה קרה בפועל מאחורי נטפרי
             subprocess.run(["curl", "-L", "-C", "-", "-o", str(MODEL), MODEL_URL], check=True)
         if MODEL.stat().st_size != MODEL_SIZE or MODEL.read_bytes()[:4] != b"lmgg":
