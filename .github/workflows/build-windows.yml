@@ -46,11 +46,17 @@ jobs:
         run: python build_tools/build_exe.py --skip-pyi
       - name: Rename EXE
         shell: pwsh
-        run: Rename-Item release/Chords.exe release/Chords-${{ matrix.name }}.exe
+        run: Move-Item -LiteralPath "release/Chords.exe" -Destination "release/Chords-${{ matrix.name }}.exe" -Force
+      - name: Verify EXE
+        shell: pwsh
+        run: |
+          $exe = "release/Chords-${{ matrix.name }}.exe"
+          if (-not (Test-Path -LiteralPath $exe)) { throw "EXE was not created: $exe" }
+          Get-Item -LiteralPath $exe | Select-Object FullName, Length
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: Chords-Windows-${{ matrix.name }}
-          path: release/Chords-${{ matrix.model }}.exe
+          path: release/Chords-${{ matrix.name }}.exe
           if-no-files-found: error
           retention-days: 14
