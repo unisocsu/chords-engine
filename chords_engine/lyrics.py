@@ -31,7 +31,7 @@ def transcribe(wav16k: Path, opts: dict, cancel: CancelToken | None = None, prog
                "-l", opts.get("language") or "he", "-t", str(opts.get("threads", 4)),
                "-bs", "1", "-bo", "1", "-ojf", "-of", str(out), "-pp"]
         if opts.get("accurate_timing"):
-            cmd += ["-nfa", "-dtw", "large.v3.turbo" if "turbo" in model.name else "large.v3"]
+            cmd += ["-nfa", "-dtw", "medium" if "medium" in model.name else ("large.v3.turbo" if "turbo" in model.name else "large.v3")]
         vad = config.vad_model_path()
         if opts.get("vad") is True and vad:
             cmd += ["--vad", "-vm", str(vad)]
