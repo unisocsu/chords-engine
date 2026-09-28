@@ -21,7 +21,7 @@ OUT = ROOT / "release" / "Chords.exe"
 SITE = Path(sys.prefix)
 CSC = Path(r"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe")
 WHISPER_FILES = ["whisper-cli.exe", "whisper.dll", "ggml.dll", "ggml-base.dll"]
-MODEL = "ggml-ivrit-large-v3-turbo-q5_0.bin"
+MODEL = "ggml-medium-q5_0.bin"
 EXCLUDES = ["matplotlib", "IPython", "jupyter", "notebook", "pytest", "tensorflow", "torchvision", "torchaudio",
             "faster_whisper", "whisper", "ctranslate2", "tkinter", "PyQt5", "PyQt6", "PySide2", "PySide6",
             "pandas", "demucs", "gradio", "transformers"]
