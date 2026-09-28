@@ -23,7 +23,7 @@ MODELS_DIR = Path(os.environ.get("CHORDS_MODELS", VENDOR / "models"))
 MODEL_DIRS = [MODELS_DIR, DATA_DIR / "models"]
 UI_DIR = Path(__file__).resolve().parent / "ui"
 
-DEFAULT_WHISPER_MODEL = "ggml-ivrit-large-v3-turbo-q5_0.bin"
+DEFAULT_WHISPER_MODEL = "ggml-medium-q5_0.bin"
 DEFAULT_PORT = 8765
 
 # ברירות המחדל של ניתוח (ה-UI יכול לשנות כל אחת)
