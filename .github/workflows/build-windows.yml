@@ -27,17 +27,21 @@ jobs:
             model: ggml-tiny-q5_1.bin
             size: "200000000"
             bundle_model: "1"
+            bundle_model: "1"
           - name: base
             model: ggml-base-q5_1.bin
             size: "300000000"
+            bundle_model: "1"
             bundle_model: "1"
           - name: small
             model: ggml-small-q5_1.bin
             size: "500000000"
             bundle_model: "1"
+            bundle_model: "1"
           - name: medium
             model: ggml-medium-q5_0.bin
             size: "539000000"
+            bundle_model: "1"
             bundle_model: "1"
           - name: nomodel
             model: ggml-medium-q5_0.bin
