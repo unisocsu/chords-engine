@@ -37,7 +37,6 @@ class SubStream : Stream {
 
 static class Program {
     const string Magic = "CHRDPAK1";
-    const string AppDir = "ChordsApp";
     const string AppExe = "ChordsApp.exe";
 
     [STAThread]
@@ -70,8 +69,7 @@ static class Program {
             Application.Run(f);
             if (err != null) { MessageBox.Show("הפריסה נכשלה:\n" + err.Message, "אקורדים"); return 1; }
         }
-        string appDir = Path.Combine(dir, AppDir);
-        string appPath = Path.Combine(appDir, AppExe);
+        string appPath = Path.Combine(dir, AppExe);
         if (!File.Exists(appPath)) {
             string msg = "ChordsApp.exe לא נמצא לאחר הפריסה:\n" + appPath;
             try { File.WriteAllText(Path.Combine(root, "startup_error.txt"), msg, Encoding.UTF8); } catch { }
@@ -83,7 +81,7 @@ static class Program {
             string oldPath = Environment.GetEnvironmentVariable("PATH") ?? "";
             Environment.SetEnvironmentVariable("PATH", dir + ";" + oldPath);
             var psi = new ProcessStartInfo(appPath) {
-                WorkingDirectory = appDir,
+                WorkingDirectory = dir,
                 UseShellExecute = false
             };
             psi.Arguments = string.Join(" ", args.Select(a => "\"" + a + "\""));
