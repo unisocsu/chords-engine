@@ -5,6 +5,11 @@ on:
     branches: [main]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      release_from_run_id:
+        description: "Existing successful build workflow run ID to use for the release"
+        required: false
+        default: ""
 
 # First public release trigger: [release-v0.1.0]
 
@@ -13,6 +18,7 @@ permissions:
 
 jobs:
   build:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.release_from_run_id == '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -96,7 +102,7 @@ jobs:
 
 
   release:
-    if: ${{ needs.build.result == 'success' && (startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release-v0.1.0]'))) }}
+    if: ${{ always() && (startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release-v0.1.0]')) || (github.event_name == 'workflow_dispatch' && inputs.release_from_run_id != '')) }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -105,21 +111,29 @@ jobs:
         with:
           name: Chords-Windows-tiny
           path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Download Base
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-base
           path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Download Small
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-small
           path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Download Medium
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-medium
           path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -160,7 +174,9 @@ jobs:
           EOF
           set -e
           TAG="${GITHUB_REF_NAME}"
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            TAG="v0.1.0"
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
             TAG="v0.1.0"
           fi
 
