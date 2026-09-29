@@ -69,7 +69,7 @@ static class Program {
             Application.Run(f);
             if (err != null) { MessageBox.Show("הפריסה נכשלה:\n" + err.Message, "אקורדים"); return 1; }
         }
-        string appPath = Path.Combine(dir, AppExe);
+        // For the no-model installer, the selected model is stored beside the launcher in Program Files.\n        // Copy it into the extracted runtime so the Python app can find it in vendor/models.\n        SyncExternalModels(self, dir);\n\n        string appPath = Path.Combine(dir, AppExe);
         if (!File.Exists(appPath)) {
             string msg = "ChordsApp.exe לא נמצא לאחר הפריסה:\n" + appPath;
             try { File.WriteAllText(Path.Combine(root, "startup_error.txt"), msg, Encoding.UTF8); } catch { }
@@ -99,7 +99,7 @@ static class Program {
         }
     }
 
-    static void Extract(string self, long off, long len, string root, string dir, Action<double> progress) {
+    static void SyncExternalModels(string self, string dir) {\n        string sourceDir = Path.Combine(Path.GetDirectoryName(self), "models");\n        if (!Directory.Exists(sourceDir)) return;\n        string targetDir = Path.Combine(dir, "vendor", "models");\n        Directory.CreateDirectory(targetDir);\n        foreach (string src in Directory.GetFiles(sourceDir, "*.bin")) {\n            string dst = Path.Combine(targetDir, Path.GetFileName(src));\n            File.Copy(src, dst, true);\n        }\n    }\n\n    static void Extract(string self, long off, long len, string root, string dir, Action<double> progress) {
         string tmp = dir + ".tmp";
         if (Directory.Exists(tmp)) Directory.Delete(tmp, true);
         Directory.CreateDirectory(tmp);
