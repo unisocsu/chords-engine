@@ -1,6 +1,7 @@
 // משגר: EXE יחיד שמכיל את כל התוכנה בתוכו (ZIP מוצמד לסוף הקובץ).
 // בהפעלה ראשונה פורס אותה ל-%LOCALAPPDATA%\ChordsEngine\app\<גרסה>, ומשם מריץ. אחר כך — הפעלה מיידית.
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -77,7 +78,6 @@ static class Program {
         }
 
         try {
-            // Ensure native DLL lookup also sees the extracted application directory.
             string oldPath = Environment.GetEnvironmentVariable("PATH") ?? "";
             Environment.SetEnvironmentVariable("PATH", dir + ";" + oldPath);
             var psi = new ProcessStartInfo(appPath) {
@@ -120,7 +120,6 @@ static class Program {
         if (Directory.Exists(dir)) Directory.Delete(dir, true);
         Directory.Move(tmp, dir);
         File.WriteAllText(Path.Combine(dir, ".complete"), DateTime.Now.ToString("o"));
-        // גרסאות ישנות תופסות מקום — מוחקים (חוץ מזו שרצה עכשיו, אם נעולה)
         foreach (var old in Directory.GetDirectories(root))
             if (!string.Equals(old, dir, StringComparison.OrdinalIgnoreCase))
                 try { Directory.Delete(old, true); } catch { }
