@@ -27,7 +27,6 @@ jobs:
             model: ggml-tiny-q5_1.bin
             size: "200000000"
             bundle_model: "1"
-            bundle_model: "1"
           - name: base
             model: ggml-base-q5_1.bin
             size: "300000000"
@@ -223,7 +222,7 @@ jobs:
 
           ## ⚠️ סטטוס הפיתוח
           הפרויקט עדיין נמצא בשלבי פיתוח. זו גרסת Preview ראשונה לצורך בדיקות ומשוב.
-          בשלב הנוכחי יש צורך ב-Python מותקן במחשב. בהמשך המטרה היא להפוך את ההפעלה לעצמאית ככל האפשר.
+          חבילות ההתקנה כוללות Python והמשתמש אינו צריך להתקין Python בנפרד.
 
           ## ארבעת המודלים
           | מודל | גודל משוער | למי מומלץ |
@@ -270,5 +269,5 @@ jobs:
           if gh release view "${TAG}" >/dev/null 2>&1; then
             gh release upload "${TAG}" release/*.exe --clobber
           else
-            gh release create "${TAG}" release/Chords-*.exe --title "ChordsEngine ${TAG} — First public release" --notes-file release-notes.md
+            gh release create "${TAG}" release/*.exe --title "ChordsEngine ${TAG} — First public release" --notes-file release-notes.md
           fi
