@@ -43,7 +43,13 @@ jobs:
       - name: Build EXE
         env:
           CHORDS_MODEL: ${{ matrix.model }}
-        run: python build_tools/build_exe.py --skip-pyi
+        run: python build_tools/build_exe.py
+      - name: Verify PyInstaller output
+        shell: pwsh
+        run: |
+          $app = "build/dist/ChordsApp/ChordsApp.exe"
+          if (-not (Test-Path -LiteralPath $app)) { throw "PyInstaller output is missing: $app" }
+          Get-Item -LiteralPath $app | Select-Object FullName, Length
       - name: Rename EXE
         shell: pwsh
         run: Move-Item -LiteralPath "release/Chords.exe" -Destination "release/Chords-${{ matrix.name }}.exe" -Force
