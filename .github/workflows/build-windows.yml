@@ -100,6 +100,32 @@ jobs:
           $exe = "release/Chords-${{ matrix.name }}.exe"
           if (-not (Test-Path -LiteralPath $exe)) { throw "EXE was not created: $exe" }
           Get-Item -LiteralPath $exe | Select-Object FullName, Length
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build Installer
+        shell: pwsh
+        env:
+          CHORDS_INSTALLER_EXE: Chords-${{ matrix.name }}.exe
+          CHORDS_INSTALLER_VARIANT: ${{ matrix.name }}
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path -LiteralPath $iscc)) { throw "Inno Setup compiler not found: $iscc" }
+          & $iscc "installer\ChordsEngine.iss"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $installer = "release\ChordsEngine-${{ matrix.name }}-Installer.exe"
+          if (-not (Test-Path -LiteralPath $installer)) { throw "Installer was not created: $installer" }
+          Get-Item -LiteralPath $installer | Select-Object FullName, Length
+
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chords-Windows-${{ matrix.name }}-Installer
+          path: release/ChordsEngine-${{ matrix.name }}-Installer.exe
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
@@ -148,6 +174,41 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-medium
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Tiny Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-tiny-Installer
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Base Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-base-Installer
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Small Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-small-Installer
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Medium Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-medium-Installer
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download No Model Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-nomodel-Installer
           path: release
           run-id: ${{ inputs.release_from_run_id || github.run_id }}
           github-token: ${{ github.token }}
@@ -207,7 +268,7 @@ jobs:
           git push origin "refs/tags/${TAG}" --force
 
           if gh release view "${TAG}" >/dev/null 2>&1; then
-            gh release upload "${TAG}" release/Chords-*.exe --clobber
+            gh release upload "${TAG}" release/*.exe --clobber
           else
             gh release create "${TAG}" release/Chords-*.exe --title "ChordsEngine ${TAG} — First public release" --notes-file release-notes.md
           fi
