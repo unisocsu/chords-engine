@@ -1,4 +1,8 @@
-# ChordsEngine — מנוע אקורדים ומילים לשירים בעברית
+# ChordsEngine — Songs, Lyrics & Guitar Chords
+
+> Windows software for songs, lyrics and guitar chords, with offline audio analysis powered by whisper.cpp.
+
+**Repository note:** The project is designed to support multiple languages as the engine evolves.
 
 זה המנוע בלבד, בלי ממשק גרפי. הוא מקבל קובץ שמע ומחזיר דף אקורדים:
 מילים בעברית, ומעל כל מילה האקורד שמתנגן בה. בנוסף הוא מזהה סולם, קצב וחלוקה לבתים,
