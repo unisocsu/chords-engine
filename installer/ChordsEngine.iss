@@ -21,7 +21,7 @@ Uninstallable=yes
 DisableProgramGroupPage=yes
 
 [Files]
-Source: "..\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\release\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\ChordsEngine {#Variant}"; Filename: "{app}\{#AppExe}"
