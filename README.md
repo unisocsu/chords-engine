@@ -1,8 +1,45 @@
 # ChordsEngine — Songs, Lyrics & Guitar Chords
 
-> Windows software for songs, lyrics and guitar chords, with offline audio analysis powered by whisper.cpp.
+> Windows software for automatically analyzing songs and generating synchronized lyrics and guitar chords, with offline audio analysis powered by whisper.cpp.
 
-**Repository note:** The project is designed to support multiple languages as the engine evolves.
+**ChordsEngine Windows** is a fork and continued development of the original chord-and-lyrics engine built with **Claude Code by [@tsoolgee](https://github.com/tsoolgee)**.
+
+The project is being developed as a Windows application with multiple editions, including builds with bundled Whisper models and a no-model edition for users who already have a model file.
+
+## ✨ What it does
+
+- 🎵 Analyzes audio files and detects chords
+- 📝 Transcribes lyrics with Whisper
+- 🎸 Places chord changes alongside the lyrics
+- 🎼 Detects key and musical structure
+- 🎹 Provides guitar and piano fingering information
+- 🔄 Supports transposition and capo suggestions
+- 💾 Keeps analyzed songs in a local library
+- 📴 Works offline after installation and model setup
+- 🪟 Distributed as standalone Windows EXE installers
+- 🌍 Designed to support additional languages as development continues
+
+## 📦 Windows editions
+
+The build pipeline produces five editions:
+
+| Edition | Whisper model | Intended use |
+|---|---|---|
+| **Tiny** | Bundled | Smallest bundled-model edition |
+| **Base** | Bundled | Lightweight bundled-model edition |
+| **Small** | Bundled | Larger model for improved transcription |
+| **Medium** | Bundled | Higher-quality bundled-model edition |
+| **No Model** | Not bundled | Choose an existing Whisper `.bin` model during installation |
+
+The **No Model** edition is useful when you already have a compatible Whisper model and do not want the installer to include one.
+
+## 🙏 Credits & original project
+
+This repository is based on the original engine created with **Claude Code by [@tsoolgee](https://github.com/tsoolgee)**.
+
+The Windows edition, packaging, installers, CI builds, and subsequent development are maintained in this repository.
+
+Original project attribution is kept here intentionally so the relationship to the original work remains clear.
 
 זה המנוע בלבד, בלי ממשק גרפי. הוא מקבל קובץ שמע ומחזיר דף אקורדים:
 מילים בעברית, ומעל כל מילה האקורד שמתנגן בה. בנוסף הוא מזהה סולם, קצב וחלוקה לבתים,
