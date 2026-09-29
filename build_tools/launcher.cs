@@ -68,10 +68,35 @@ static class Program {
             Application.Run(f);
             if (err != null) { MessageBox.Show("הפריסה נכשלה:\n" + err.Message, "אקורדים"); return 1; }
         }
-        var psi = new ProcessStartInfo(Path.Combine(dir, AppExe)) { WorkingDirectory = dir, UseShellExecute = false };
-        psi.Arguments = string.Join(" ", args.Select(a => "\"" + a + "\""));
-        Process.Start(psi);
-        return 0;
+        string appPath = Path.Combine(dir, AppExe);
+        if (!File.Exists(appPath)) {
+            string msg = "ChordsApp.exe לא נמצא לאחר הפריסה:\n" + appPath;
+            try { File.WriteAllText(Path.Combine(root, "startup_error.txt"), msg, Encoding.UTF8); } catch { }
+            MessageBox.Show(msg, "אקורדים");
+            return 1;
+        }
+
+        try {
+            // Ensure native DLL lookup also sees the extracted application directory.
+            string oldPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+            Environment.SetEnvironmentVariable("PATH", dir + ";" + oldPath);
+            var psi = new ProcessStartInfo(appPath) {
+                WorkingDirectory = dir,
+                UseShellExecute = false
+            };
+            psi.Arguments = string.Join(" ", args.Select(a => "\"" + a + "\""));
+            Process.Start(psi);
+            return 0;
+        }
+        catch (Win32Exception ex) {
+            string msg = "הפעלת התוכנה נכשלה.\n\n"
+                       + "קובץ: " + appPath + "\n"
+                       + "שגיאה: " + ex.Message + "\n"
+                       + "NativeErrorCode: " + ex.NativeErrorCode;
+            try { File.WriteAllText(Path.Combine(root, "startup_error.txt"), msg, Encoding.UTF8); } catch { }
+            MessageBox.Show(msg, "אקורדים");
+            return 1;
+        }
     }
 
     static void Extract(string self, long off, long len, string root, string dir, Action<double> progress) {
