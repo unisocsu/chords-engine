@@ -23,6 +23,7 @@ SITE = Path(sys.prefix)
 CSC = Path(r"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe")
 WHISPER_FILES = ["whisper-cli.exe", "whisper.dll", "ggml.dll", "ggml-base.dll"]
 MODEL = os.environ.get("CHORDS_MODEL", "ggml-medium-q5_0.bin")
+BUNDLE_MODEL = os.environ.get("CHORDS_BUNDLE_MODEL", "1") == "1"
 EXCLUDES = ["matplotlib", "IPython", "jupyter", "notebook", "pytest", "tensorflow", "torchvision", "torchaudio",
             "faster_whisper", "whisper", "ctranslate2", "tkinter", "PyQt5", "PyQt6", "PySide2", "PySide6",
             "pandas", "demucs", "gradio", "transformers"]
@@ -57,9 +58,10 @@ def vendor():
     rel = src / "whisper" / "Release"
     for f in WHISPER_FILES + [p.name for p in rel.glob("ggml-cpu-*.dll")]:
         shutil.copy2(rel / f, wdst / f)
-    mdst = DIST / "vendor" / "models"
-    mdst.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src / "models" / MODEL, mdst / MODEL)
+    if BUNDLE_MODEL:
+        mdst = DIST / "vendor" / "models"
+        mdst.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src / "models" / MODEL, mdst / MODEL)
 
 
 def pack() -> Path:
