@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ChordsEngine Windows — תוכנה ל-Windows להצגת מילות שירים ואקורדים לגיטרה, עם תמלול אודיו וזיהוי אקורדים באמצעות whisper.cpp.">
+  <meta name="keywords" content="ChordsEngine, guitar chords, song lyrics, Windows, whisper.cpp, chord detection, transcription, אקורדים, מילות שירים">
+  <meta name="theme-color" content="#0b1020">
+  <title>ChordsEngine Windows — Lyrics & Guitar Chords</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#">
+      <span class="brand-mark">♪</span>
+      <span>ChordsEngine</span>
+    </a>
+    <nav>
+      <a href="#features">יכולות</a>
+      <a href="#editions">מהדורות</a>
+      <a href="#about">אודות</a>
+      <a class="github-link" href="https://github.com/unisocsu/chords-engine-windows" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">WINDOWS • OFFLINE • WHISPER.CPP</div>
+        <h1>מילים ואקורדים.<br><span>ישירות מהשיר.</span></h1>
+        <p class="lead">ChordsEngine מנתחת קובצי שמע ומפיקה דף אקורדים עם מילים, זיהוי סולם, קצב ומבנה — בעיבוד מקומי על מחשב Windows.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/unisocsu/chords-engine-windows/releases" target="_blank" rel="noopener">הורדת התוכנה</a>
+          <a class="button secondary" href="https://github.com/unisocsu/chords-engine-windows" target="_blank" rel="noopener">צפייה ב-GitHub</a>
+        </div>
+        <p class="micro">לאחר ההתקנה והגדרת המודל, העיבוד יכול להתבצע ללא חיבור לאינטרנט.</p>
+      </div>
+      <div class="hero-card" aria-label="ChordsEngine preview">
+        <div class="window-top"><span></span><span></span><span></span></div>
+        <div class="song">
+          <div class="song-title">Song Analysis</div>
+          <div class="chord-row"><b>G</b><b>D</b><b>Em</b><b>C</b></div>
+          <div class="lyric-row">מילים של השיר מסודרות כאן</div>
+          <div class="chord-row second"><b>Am</b><b>Em</b><b>C</b><b>D</b></div>
+          <div class="lyric-row">והאקורדים מיושרים לפי זמן הנגינה</div>
+          <div class="stats"><span>♫ Key: G</span><span>♩ 96 BPM</span><span>✓ Offline</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="section-heading">
+        <div class="eyebrow">FEATURES</div>
+        <h2>כל מה שצריך לדף אקורדים</h2>
+      </div>
+      <div class="grid">
+        <article><div class="icon">🎸</div><h3>זיהוי אקורדים</h3><p>ניתוח אודיו וזיהוי אקורדים לאורך השיר.</p></article>
+        <article><div class="icon">📝</div><h3>תמלול מילים</h3><p>תמלול באמצעות Whisper עם זמני מילים לצורך יישור האקורדים.</p></article>
+        <article><div class="icon">🎼</div><h3>סולם וקצב</h3><p>זיהוי סולם, קצב ופעמות ומבנה מוזיקלי.</p></article>
+        <article><div class="icon">🔄</div><h3>טרנספוזיציה</h3><p>שינוי סולם ואפשרות לעבוד עם קאפו.</p></article>
+        <article><div class="icon">💾</div><h3>ספרייה מקומית</h3><p>השירים והניתוחים נשמרים מקומית במחשב.</p></article>
+        <article><div class="icon">🪟</div><h3>Windows EXE</h3><p>מהדורות מוכנות להתקנה שאינן דורשות Python.</p></article>
+      </div>
+    </section>
+
+    <section id="editions" class="section editions">
+      <div class="section-heading">
+        <div class="eyebrow">EDITIONS</div>
+        <h2>חמש מהדורות לכל Build</h2>
+        <p>בחר את גודל מודל Whisper שמתאים לך — או הבא מודל משלך.</p>
+      </div>
+      <div class="edition-grid">
+        <div class="edition"><strong>Tiny</strong><span>מודל כלול</span><small>המהדורה הקטנה ביותר</small></div>
+        <div class="edition"><strong>Base</strong><span>מודל כלול</span><small>מהדורה קלה</small></div>
+        <div class="edition"><strong>Small</strong><span>מודל כלול</span><small>מודל גדול יותר</small></div>
+        <div class="edition featured"><strong>Medium</strong><span>מודל כלול</span><small>איכות תמלול גבוהה יותר</small></div>
+        <div class="edition"><strong>No Model</strong><span>ללא מודל</span><small>בחירת מודל בזמן ההתקנה</small></div>
+      </div>
+    </section>
+
+    <section id="about" class="section about">
+      <div>
+        <div class="eyebrow">ABOUT</div>
+        <h2>מנוע מקומי, פרויקט פתוח</h2>
+        <p>ChordsEngine Windows הוא fork והמשך פיתוח של מנוע האקורדים והמילים המקורי שנבנה באמצעות Claude Code על ידי <a href="https://github.com/tsoolgee" target="_blank" rel="noopener">@tsoolgee</a>.</p>
+        <p>הפרויקט ממשיך להתפתח עם אריזת Windows, מתקינים, מהדורות עם מודלים משולבים ו-builds אוטומטיים ב-GitHub Actions.</p>
+      </div>
+      <div class="tech"><span>Python</span><span>whisper.cpp</span><span>lv-chordia</span><span>librosa</span><span>PyAV</span><span>WebView2</span></div>
+    </section>
+
+    <section class="cta">
+      <h2>מוכן לנתח את השיר הבא?</h2>
+      <p>הקוד, המהדורות וההורדות זמינים ב-GitHub.</p>
+      <a class="button primary" href="https://github.com/unisocsu/chords-engine-windows/releases" target="_blank" rel="noopener">לכל ההורדות ↗</a>
+    </section>
+  </main>
+
+  <footer>
+    <span>© ChordsEngine Windows</span>
+    <a href="https://github.com/unisocsu/chords-engine-windows" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>
