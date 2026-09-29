@@ -3,7 +3,11 @@ name: Build Windows EXE
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -87,3 +91,69 @@ jobs:
           path: release/Chords-${{ matrix.name }}.exe
           if-no-files-found: error
           retention-days: 14
+
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Tiny
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-tiny
+          path: release
+      - name: Download Base
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-base
+          path: release
+      - name: Download Small
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-small
+          path: release
+      - name: Download Medium
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-medium
+          path: release
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > release-notes.md <<'EOF'
+          # ChordsEngine — First public release
+
+          תוכנת אקורדים ומילים לשירים בעברית — גרסת EXE ראשונה.
+
+          ## ⚠️ סטטוס הפיתוח
+          הפרויקט עדיין נמצא בשלבי פיתוח. זו גרסת Preview ראשונה לצורך בדיקות ומשוב.
+          בשלב הנוכחי יש צורך ב-Python מותקן במחשב. בהמשך המטרה היא להפוך את ההפעלה לעצמאית ככל האפשר.
+
+          ## ארבעת המודלים
+          | מודל | גודל משוער | למי מומלץ |
+          |---|---:|---|
+          | Tiny | ~200 MB | מחשבים חלשים מאוד ובדיקות מהירות; עדיפות למהירות על פני דיוק |
+          | Base | ~300 MB | מחשבים חלשים יחסית ושימוש בסיסי |
+          | Small | ~500 MB | איזון בין איכות, מהירות ומשאבים |
+          | Medium | ~539 MB | כאשר רוצים תמלול איכותי יותר ומוכנים להשקיע יותר זמן CPU |
+
+          גודל הקובץ אינו מדד ישיר לאיכות. הביצועים תלויים גם במחשב ובאיכות ההקלטה.
+
+          ## מה כלול
+          - תמלול באמצעות whisper.cpp.
+          - זיהוי אקורדים באמצעות lv-chordia.
+          - שילוב המילים והאקורדים לדף אקורדים.
+          - ארבע גרסאות EXE, אחת לכל מודל Whisper.
+
+          ## בהמשך
+          נוסיף מודלים כבדים וחזקים יותר, כולל מודלים ממשפחת Large, לצד שיפורים בדיוק, בביצועים ובממשק.
+
+          ## איזה מודל לבחור?
+          אם אינך בטוח, מומלץ לבדוק קודם את Small. אם הדיוק עדיין לא מספיק, נסה Medium.
+          אם המחשב חלש או שהמהירות חשובה במיוחד, נסה Base או Tiny.
+
+          תודה על הבדיקות והמשוב!
+          EOF
+          gh release create "${GITHUB_REF_NAME}" release/Chords-*.exe --title "ChordsEngine ${GITHUB_REF_NAME} — First public release" --notes-file release-notes.md
