@@ -35,6 +35,10 @@ jobs:
           - name: medium
             model: ggml-medium-q5_0.bin
             size: "539000000"
+          - name: nomodel
+            model: ggml-medium-q5_0.bin
+            size: "539000000"
+            bundle_model: "0"
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
@@ -51,10 +55,12 @@ jobs:
         env:
           CHORDS_MODEL: ${{ matrix.model }}
           CHORDS_MODEL_SIZE: ${{ matrix.size }}
+          CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model || '1' }}
         run: python scripts/setup_vendor.py
       - name: Build EXE
         env:
           CHORDS_MODEL: ${{ matrix.model }}
+          CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model || '1' }}
         run: python build_tools/build_exe.py
       - name: Verify PyInstaller output
         shell: pwsh
@@ -129,6 +135,13 @@ jobs:
           path: release
           run-id: ${{ inputs.release_from_run_id || github.run_id }}
           github-token: ${{ github.token }}
+      - name: Download No Model
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-nomodel
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Download Medium
         uses: actions/download-artifact@v4
         with:
@@ -156,6 +169,7 @@ jobs:
           | Base | ~300 MB | מחשבים חלשים יחסית ושימוש בסיסי |
           | Small | ~500 MB | איזון בין איכות, מהירות ומשאבים |
           | Medium | ~539 MB | כאשר רוצים תמלול איכותי יותר ומוכנים להשקיע יותר זמן CPU |
+          | No Model | קטן משמעותית | למי שכבר מחזיק את המודל במחשב |
 
           גודל הקובץ אינו מדד ישיר לאיכות. הביצועים תלויים גם במחשב ובאיכות ההקלטה.
 
@@ -163,7 +177,7 @@ jobs:
           - תמלול באמצעות whisper.cpp.
           - זיהוי אקורדים באמצעות lv-chordia.
           - שילוב המילים והאקורדים לדף אקורדים.
-          - ארבע גרסאות EXE, אחת לכל מודל Whisper.
+          - חמש גרסאות EXE: Tiny, Base, Small, Medium וגרסה ללא מודל.
 
           ## בהמשך
           נוסיף מודלים כבדים וחזקים יותר, כולל מודלים ממשפחת Large, לצד שיפורים בדיוק, בביצועים ובממשק.
