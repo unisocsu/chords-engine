@@ -50,6 +50,27 @@ jobs:
           $app = "build/dist/ChordsApp/ChordsApp.exe"
           if (-not (Test-Path -LiteralPath $app)) { throw "PyInstaller output is missing: $app" }
           Get-Item -LiteralPath $app | Select-Object FullName, Length
+      - name: Verify bundled Python runtime
+        shell: pwsh
+        run: |
+          $root = "build/dist/ChordsApp"
+          $app = Join-Path $root "ChordsApp.exe"
+          if (-not (Test-Path -LiteralPath $app)) { throw "PyInstaller executable is missing: $app" }
+
+          $pythonDll = Get-ChildItem -LiteralPath $root -Recurse -Filter "python311.dll" -File | Select-Object -First 1
+          if ($null -eq $pythonDll) { throw "PyInstaller Python runtime is missing: python311.dll" }
+
+          $internal = Join-Path $root "_internal"
+          if (-not (Test-Path -LiteralPath $internal -PathType Container)) {
+            Write-Warning "No _internal directory found; using legacy PyInstaller layout."
+          }
+
+          Write-Host "ChordsApp.exe:"
+          Get-Item -LiteralPath $app | Select-Object FullName, Length
+          Write-Host "python311.dll:"
+          $pythonDll | Select-Object FullName, Length
+          Write-Host "Runtime directory: $($pythonDll.DirectoryName)"
+
       - name: Rename EXE
         shell: pwsh
         run: Move-Item -LiteralPath "release/Chords.exe" -Destination "release/Chords-${{ matrix.name }}.exe" -Force
