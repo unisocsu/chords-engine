@@ -8,14 +8,14 @@
 AppId={{B7C2E2F0-4E4C-4F7B-A8B1-9C0D7E123456}
 AppName={#AppName} {#Variant}
 AppVersion={#AppVersion}
-DefaultDirName={localappdata}\Programs\ChordsEngine\{#Variant}
+DefaultDirName={autopf}\ChordsEngine\{#Variant}
 DefaultGroupName={#AppName} {#Variant}
 OutputDir=..\release
 OutputBaseFilename=ChordsEngine-{#Variant}-Installer
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64compatible
 Uninstallable=yes
 DisableProgramGroupPage=yes
@@ -59,7 +59,7 @@ begin
       exit;
     end;
 
-    DstDir := ExpandConstant('{localappdata}\ChordsEngine\models');
+    DstDir := ExpandConstant('{app}\models');
     ForceDirectories(DstDir);
     Dst := AddBackslash(DstDir) + ExtractFileName(Src);
 
