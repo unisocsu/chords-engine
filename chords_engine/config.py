@@ -20,6 +20,8 @@ DATA_DIR = Path(os.environ.get("CHORDS_DATA", Path(os.environ.get("LOCALAPPDATA"
 LIBRARY_DIR = DATA_DIR / "library"
 # מודלים: ליד התוכנה (vendor/models) או בתיקיית הנתונים של המשתמש
 MODELS_DIR = Path(os.environ.get("CHORDS_MODELS", VENDOR / "models"))
+if not MODELS_DIR.exists() or not any(MODELS_DIR.glob("*.bin")):
+    MODELS_DIR = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "ChordsEngine" / "models"
 MODEL_DIRS = [MODELS_DIR, DATA_DIR / "models"]
 UI_DIR = Path(__file__).resolve().parent / "ui"
 
