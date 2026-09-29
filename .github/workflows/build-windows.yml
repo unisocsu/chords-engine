@@ -6,6 +6,8 @@ on:
     tags: ["v*"]
   workflow_dispatch:
 
+# First public release trigger: [release-v0.1.0]
+
 permissions:
   contents: write
 
