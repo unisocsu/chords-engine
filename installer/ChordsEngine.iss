@@ -5,12 +5,12 @@
 #define Variant GetEnv("CHORDS_INSTALLER_VARIANT")
 
 [Setup]
-AppId={{B7C2E2F0-4E4C-4F7B-A8B1-CHORDSENGINE01}
-AppName={#AppName}
+AppId={{B7C2E2F0-4E4C-4F7B-A8B1-9C0D7E123456}
+AppName={#AppName} {#Variant}
 AppVersion={#AppVersion}
-DefaultDirName={localappdata}\Programs\ChordsEngine
-DefaultGroupName={#AppName}
-OutputDir=release
+DefaultDirName={localappdata}\Programs\ChordsEngine\{#Variant}
+DefaultGroupName={#AppName} {#Variant}
+OutputDir=..\release
 OutputBaseFilename=ChordsEngine-{#Variant}-Installer
 Compression=lzma2
 SolidCompression=yes
@@ -21,14 +21,11 @@ Uninstallable=yes
 DisableProgramGroupPage=yes
 
 [Files]
-Source: "{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\{#AppExe}"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\ChordsEngine"; Filename: "{app}\{#AppExe}"
-Name: "{autodesktop}\ChordsEngine"; Filename: "{app}\{#AppExe}"
-
-[UninstallDelete]
-Type: filesandordirs; Name: "{localappdata}\ChordsEngine"
+Name: "{group}\ChordsEngine {#Variant}"; Filename: "{app}\{#AppExe}"
+Name: "{autodesktop}\ChordsEngine {#Variant}"; Filename: "{app}\{#AppExe}"
 
 [Code]
 var
