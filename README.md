@@ -1,177 +1,225 @@
-# ChordsEngine — Songs, Lyrics & Guitar Chords
+# ChordsEngine Windows
 
-> Windows software for automatically analyzing songs and generating synchronized lyrics and guitar chords, with offline audio analysis powered by whisper.cpp.
+**תוכנה ל-Windows להצגת מילות שירים ואקורדים לגיטרה, עם תמלול אודיו וזיהוי אקורדים באמצעות whisper.cpp. פועלת מקומית ובאופן לא מקוון.**
 
-**ChordsEngine Windows** is a fork and continued development of the original chord-and-lyrics engine built with **Claude Code by [@tsoolgee](https://github.com/tsoolgee)**.
+**Windows software for song lyrics and guitar chords, with offline audio transcription and chord detection powered by whisper.cpp. Runs locally without requiring an internet connection.**
 
-The project is being developed as a Windows application with multiple editions, including builds with bundled Whisper models and a no-model edition for users who already have a model file.
+---
 
-## ✨ What it does
+## 🇮🇱 עברית
 
-- 🎵 Analyzes audio files and detects chords
-- 📝 Transcribes lyrics with Whisper
-- 🎸 Places chord changes alongside the lyrics
-- 🎼 Detects key and musical structure
-- 🎹 Provides guitar and piano fingering information
-- 🔄 Supports transposition and capo suggestions
-- 💾 Keeps analyzed songs in a local library
-- 📴 Works offline after installation and model setup
-- 🪟 Distributed as standalone Windows EXE installers
-- 🌍 Designed to support additional languages as development continues
+### מה זה ChordsEngine?
 
-## 📦 Windows editions
+**ChordsEngine Windows** היא תוכנה ל-Windows לניתוח שירים ולהפקת דף אקורדים ומילים.
 
-The build pipeline produces five editions:
+התוכנה יכולה לקבל קובץ שמע, לנתח אותו באמצעות מנועי עיבוד אודיו ו-Whisper, וליצור תוצאה הכוללת:
 
-| Edition | Whisper model | Intended use |
+- 🎵 מילות השיר
+- 🎸 אקורדים לגיטרה
+- 🎼 זיהוי סולם
+- 🥁 קצב ופעמות
+- 📝 הצמדת האקורדים למילים לפי זמן הנגינה
+- 🔄 טרנספוזיציה
+- 🎹 אצבועי גיטרה ופסנתר
+- 🎛️ הצעות קאפו
+- 💾 ספרייה מקומית לשירים שנותחו
+- 📴 עבודה מקומית ללא צורך בחיבור לאינטרנט לאחר ההתקנה והגדרת המודל
+
+### איך זה עובד?
+
+ChordsEngine משלב מספר רכיבים:
+
+- **whisper.cpp** — תמלול האודיו וזיהוי מילים וזמנים.
+- **lv-chordia** — זיהוי אקורדים.
+- **librosa** — ניתוח קצב ופעמות.
+- **PyAV / FFmpeg** — פענוח קובצי שמע ווידאו.
+- מנוע Python שמחבר את תוצאות הניתוח ומפיק דף אקורדים.
+
+המערכת מיועדת לעבודה מקומית. עיבוד השיר מתבצע על המחשב של המשתמש.
+
+### מהדורות Windows
+
+בכל Build של הפרויקט נבנות חמש מהדורות:
+
+| מהדורה | מודל Whisper | תיאור |
+|---|---|---|
+| **Tiny** | כלול | המהדורה הקטנה ביותר עם מודל |
+| **Base** | כלול | מהדורה קלה עם מודל |
+| **Small** | כלול | מודל גדול יותר לתמלול |
+| **Medium** | כלול | מודל גדול יותר לאיכות תמלול גבוהה יותר |
+| **No Model** | לא כלול | המשתמש בוחר קובץ מודל קיים בזמן ההתקנה |
+
+כל מהדורה מסופקת כ-**Windows EXE Installer** ואינה דורשת התקנת Python אצל המשתמש.
+
+### מהדורת No Model
+
+במהדורת **No Model** המודל אינו נכלל בקובץ ההתקנה.
+
+במהלך ההתקנה המשתמש בוחר את קובץ מודל ה-Whisper שברשותו, והמתקין מעתיק אותו לתיקיית התוכנה.
+
+המתקין יוצר גם קיצורים:
+
+- תפריט התחל
+- שולחן העבודה
+
+### דרישות
+
+- Windows 64-bit
+- WebView2 לצורך הממשק
+- מודל Whisper מתאים למהדורה שבה משתמשים
+- אין צורך ב-Python עבור גרסאות ה-EXE המוכנות
+
+### פיתוח והרצה
+
+למפתחים ניתן להריץ את המנוע ישירות מסביבת Python:
+
+```bash
+pip install -r requirements.txt
+python scripts/setup_vendor.py
+python -m chords_engine serve
+```
+
+ניתוח קובץ שמע:
+
+```bash
+python -m chords_engine analyze song.mp3 --out out
+```
+
+בדיקות:
+
+```bash
+python -m unittest discover tests
+```
+
+### טכנולוגיות
+
+- Python
+- whisper.cpp
+- Whisper
+- lv-chordia
+- librosa
+- PyAV
+- FFmpeg
+- pywebview
+- WebView2
+
+---
+
+## 🇬🇧 English
+
+### What is ChordsEngine?
+
+**ChordsEngine Windows** is Windows software for analyzing songs and generating lyrics and guitar-chord sheets.
+
+The application can process an audio file and produce results including:
+
+- 🎵 Song lyrics
+- 🎸 Guitar chords
+- 🎼 Musical key detection
+- 🥁 Tempo and beat information
+- 📝 Time-aligned chord placement
+- 🔄 Chord transposition
+- 🎹 Guitar and piano fingering information
+- 🎛️ Capo suggestions
+- 💾 A local song library
+- 📴 Offline/local processing after installation and model setup
+
+### How does it work?
+
+ChordsEngine combines several components:
+
+- **whisper.cpp** — audio transcription and word/timestamp detection.
+- **lv-chordia** — chord detection.
+- **librosa** — tempo and beat analysis.
+- **PyAV / FFmpeg** — audio and video decoding.
+- A Python processing engine that combines the analysis results into a chord sheet.
+
+The processing is designed to run locally on the user's Windows computer.
+
+### Windows Editions
+
+Every build produces five editions:
+
+| Edition | Whisper model | Description |
 |---|---|---|
 | **Tiny** | Bundled | Smallest bundled-model edition |
 | **Base** | Bundled | Lightweight bundled-model edition |
 | **Small** | Bundled | Larger model for improved transcription |
-| **Medium** | Bundled | Higher-quality bundled-model edition |
-| **No Model** | Not bundled | Choose an existing Whisper `.bin` model during installation |
+| **Medium** | Bundled | Larger model for higher transcription quality |
+| **No Model** | Not bundled | Choose an existing model during installation |
 
-The **No Model** edition is useful when you already have a compatible Whisper model and do not want the installer to include one.
+Every edition is distributed as a **Windows EXE Installer** and does not require Python to be installed by the end user.
 
-## 🙏 Credits & original project
+### No Model Edition
 
-This repository is based on the original engine created with **Claude Code by [@tsoolgee](https://github.com/tsoolgee)**.
+The **No Model** edition does not include a Whisper model in the installer.
 
-The Windows edition, packaging, installers, CI builds, and subsequent development are maintained in this repository.
+During installation, the user selects an existing Whisper model file. The installer copies the model into the application's installation directory.
 
-Original project attribution is kept here intentionally so the relationship to the original work remains clear.
+The installer also creates shortcuts in:
 
-זה המנוע בלבד, בלי ממשק גרפי. הוא מקבל קובץ שמע ומחזיר דף אקורדים:
-מילים בעברית, ומעל כל מילה האקורד שמתנגן בה. בנוסף הוא מזהה סולם, קצב וחלוקה לבתים,
-מציע קאפו ומחזיר אצבועי גיטרה ופסנתר. יש לו גם טרנספוזיציה, עריכה וייצוא.
-הממשק (שייבנה עם גרפיקאי) מדבר עם המנוע דרך שרת HTTP מקומי.
+- Start Menu
+- Desktop
 
-- מה צריך להיות בממשק: [docs/UI_SPEC.md](docs/UI_SPEC.md)
-- ה-API המלא: [docs/API.md](docs/API.md)
+### Requirements
 
-## למה Python
+- Windows 64-bit
+- WebView2 for the graphical interface
+- A compatible Whisper model for the selected edition
+- Python is not required for the packaged EXE editions
 
-| שיקול | Python | C++ + C# | Java |
-|---|---|---|---|
-| זיהוי אקורדים | כל הספריות הטובות כתובות ב-Python/PyTorch | צריך לייצא מודל ל-ONNX ולכתוב מחדש את חילוץ ה-CQT ואת פענוח ה-HMM | כמו C# |
-| whisper.cpp | מריצים את `whisper-cli.exe` כתהליך | קישור ישיר (P/Invoke) | JNI |
-| מהירות | החישוב הכבד רץ ממילא ב-C++ (whisper.cpp) וב-PyTorch/NumPy. Python רק מתזמר | אותו דבר | אותו דבר |
-| זמן פיתוח ותחזוקה | הכי קצר, וכל הפרויקטים שלנו כתובים בו | הכי ארוך | ארוך |
+### Development
 
-**המסקנה:** מנוע ב-Python ששרת HTTP מקומי חושף אותו. אם יתברר שצריך ממשק ב-C# (WPF/WinUI),
-ב-Electron או ב-WebView2, הוא פשוט ידבר עם `127.0.0.1:8765`, בלי לגעת במנוע.
-כתיבה מחדש ב-C++ לא הייתה מאיצה את החלק האיטי (התמלול), כי הוא כבר רץ ב-C++.
-
-## הספריות
-
-| תפקיד | ספרייה | רישיון | הערות |
-|---|---|---|---|
-| תמלול מילים | [whisper.cpp](https://github.com/ggml-org/whisper.cpp), גרסת `b5130`, קובץ `whisper-cli.exe` | MIT | רץ כתהליך נפרד, כך שאפשר לבטל אותו ולעקוב אחרי ההתקדמות |
-| מודל עברית | [ivrit-ai/whisper-large-v3-turbo-ggml](https://huggingface.co/ivrit-ai/whisper-large-v3-turbo-ggml), מכווץ ל-q5_0 | Apache-2.0 | 550MB. יש גם גרסה מלאה (1.6GB) |
-| זיהוי אקורדים | [lv-chordia](https://github.com/openmirlab/lv-chordia) 1.1.0 | MIT | אנסמבל של 5 רשתות (ISMIR 2019) + HMM, כ-170 אקורדים כולל 7, maj7, sus, dim ובס. המודל כלול בחבילה ועובד בלי אינטרנט |
-| קצב ופעמות | [librosa](https://librosa.org) 1.0 | ISC | `beat_track` |
-| רשתות נוירונים | PyTorch 2.13 (CPU) | BSD | נמשך דרך lv-chordia |
-| פענוח שמע ווידאו, Metadata, תמונת אלבום | PyAV (ffmpeg מובנה) | LGPL/BSD | כל פורמט, בלי ffmpeg.exe חיצוני |
-| חלון | pywebview + WebView2 | BSD | ממשק HTML/RTL, דיאלוגים של Windows |
-| תורת המוזיקה | כתוב כאן (`theory.py`) | — | טרנספוזיציה, כתיב דיאז/במול לפי הסולם, זיהוי סולם (Krumhansl), קאפו, אצבועי גיטרה ופסנתר |
-| שרת | ספריית התקן (`http.server`) | — | בלי תלויות נוספות |
-| אופציונלי | demucs (הפרדת שירה), silero-VAD | MIT | כבויים כברירת מחדל |
-
-ספריות שבדקתי ולא בחרתי:
-- **madmom**: מזהה רק מז'ור/מינור, ולא נבנה עם NumPy 2.
-- **Essentia**: אין לו חבילה לווינדוס.
-- **Chordino / NNLS-Chroma**: דורש תוסף Vamp, והדיוק נמוך יותר.
-- **BTC**: טוב, אבל לא ארוז כחבילה.
-- **ChordFormer**: מחקרי.
-
-## התקנה
+For development, the engine can be run directly from Python:
 
 ```bash
 pip install -r requirements.txt
-python scripts/setup_vendor.py      # whisper.cpp + מודל עברית (1.6GB) + כיווץ ל-q5_0
+python scripts/setup_vendor.py
+python -m chords_engine serve
 ```
 
-## התוכנה המלאה (EXE)
+Analyze an audio file:
 
 ```bash
-python build_tools/build_exe.py      # -> release/Chords.exe (קובץ אחד, כולל מודל העברית)
-python -m chords_engine app          # אותה תוכנה בלי לבנות, לפיתוח
+python -m chords_engine analyze song.mp3 --out out
 ```
-- **הפעלה ראשונה:** `Chords.exe` פורס את עצמו ל-`%LOCALAPPDATA%\ChordsEngine\app\<גרסה>`. זה לוקח פעם אחת בערך דקה.
-- **הפעלות הבאות:** מיידיות.
-- **החלון:** WebView2 (pywebview). אם pywebview נכשל, התוכנה נפתחת ב-Edge במצב אפליקציה.
-- **הממשק** (`chords_engine/ui`) הוא אב-טיפוס עובד מעל ה-API, והגרפיקאי יחליף את העיצוב שלו.
-- **לוג:** `%LOCALAPPDATA%\ChordsEngine\engine.log`
 
-## הרצה
+Run tests:
 
 ```bash
-python -m chords_engine serve                       # שרת ל-UI על 127.0.0.1:8765
-python -m chords_engine analyze song.mp3 --out out  # ניתוח + json/txt/cho/lrc
-python -m chords_engine analyze song.mp3 --lyrics words.txt --capo 3
-python -m chords_engine chord "D/F#"
-python -m unittest discover tests                   # בדיקות (בלי whisper, כחצי דקה)
+python -m unittest discover tests
 ```
 
-הספרייה נשמרת ב-`%LOCALAPPDATA%\ChordsEngine\library\<id>\`. בכל שיר יש `analysis.json`
-(תוצאת הניתוח המקורית) ו-`song.json` (כולל עריכות). המזהה נגזר מתוכן הקובץ, ולכן שיר שכבר נותח נפתח מיד.
+### Technologies
 
-## איך זה עובד
+- Python
+- whisper.cpp
+- Whisper
+- lv-chordia
+- librosa
+- PyAV
+- FFmpeg
+- pywebview
+- WebView2
 
-```
-קובץ שמע ─ffmpeg─► wav 22kHz ─lv-chordia─► אקורדים גולמיים ─┐
-                            └─librosa──► פעמות, קצב ──────────┼─► ניקוי (מיזוג קצרים, יישור לפעמה)
-         ─ffmpeg─► wav 16kHz ─whisper.cpp─► מילים + זמנים ───┤      │
-                                   (או: מילים שהודבקו + יישור) │      ▼
-                                                              └─► שיבוץ: כל החלפת אקורד → אות בשורה
-                                                                  שורות, קטעי נגינה, בתים, סולם
-                                                                  ─► song.json ─► תצוגה (טרנספוזיציה/קאפו/כתיב)
-```
+---
 
-- **שיבוץ אקורד מעל מילה**: אקורד שמתחלף עד 0.35 שניות לפני מילה שייך לה.
-  זמני המילים של whisper גסים, ולכן האקורד נצמד לתחילת המילה הקרובה.
-  רק בצליל ארוך (מילה של 1.2 שניות ומעלה) הוא ממוקם באמצע המילה.
-- **קטעי נגינה**: רווח של 4 שניות ומעלה בלי שירה הופך ל"פתיחה", "מעבר" או "סיום" עם תיבות.
-- **מילים ידועות**: אם מדביקים את המילים הנכונות, הן מיושרות למילים שזוהו
-  (בהשוואה שמתעלמת מניקוד, פיסוק ואותיות סופיות), והשורות והבתים נלקחים מהטקסט.
-  אפשר לעשות את זה גם אחרי הניתוח, תוך שניות ובלי לתמלל שוב.
+## 🌍 Languages
 
-## מה נבדק ובאילו תנאים
+The project is designed to support additional languages as development continues.
 
-המחשב: i3-10105T, ‏8GB, בלי כרטיס מסך.
+---
 
-| בדיקה | תוצאה |
-|---|---|
-| התקדמות סינתטית (C G Am F C D7 G Em) | כל 8 האקורדים זוהו נכון, כולל D7, והגבולות מדויקים ל-0.03 שניות |
-| קטע של 32 שניות: הרצאה בעברית + אקורדים ברקע | התמלול כמעט מושלם. האקורדים שובצו מעל המילים הנכונות. כל הניתוח לקח 104 שניות, מתוכן 67 לתמלול |
-| הגדרות תמלול | מודל מלא עם beam 5 ו-4 ליבות: ‏154 שניות. q5_0 עם greedy ו-4 ליבות: ‏91 שניות. אותו דבר עם 8 ליבות: ‏67 שניות. הטקסט כמעט זהה |
-| DTW (`accurate_timing`) | עובד, ומוסיף בערך 40% לזמן |
-| VAD | מהיר פי 2, אבל איבד את השורה הראשונה והזיז את השיבוץ. לכן כבוי כברירת מחדל |
-| 10 בדיקות יחידה ושרת | עוברות |
+## 🙏 Credits
 
-**עוד לא נבדק על שיר מוקלט אמיתי**, כי לא היה כזה במחשב. שירה עם מוזיקה קשה לתמלול
-יותר מדיבור. אם התמלול חלש, אפשר להדליק `separate_vocals` (צריך `pip install demucs`)
-או להדביק את המילים הנכונות.
+**ChordsEngine Windows** is a fork and continued development of the original chord-and-lyrics engine built with **Claude Code by [@tsoolgee](https://github.com/tsoolgee)**.
 
-**הערכת זמן לשיר של 4 דקות במחשב הזה**: כדקה לאקורדים וכ-6 עד 9 דקות לתמלול.
-עם `skip_lyrics` זה כדקה בסך הכול.
+The Windows packaging, EXE editions, installers, GitHub Actions build pipeline, and continued development are maintained in this repository.
 
-## מבנה
+Original project attribution is intentionally preserved.
 
-```
-chords_engine/
-  config.py     נתיבים וברירות מחדל
-  audio.py      ffmpeg, הרצת תהליכים עם ביטול, demucs
-  chords.py     lv-chordia (עם התקדמות וביטול), librosa, ניקוי אקורדים
-  lyrics.py     whisper-cli + פענוח JSON (כולל UTF-8 חתוך בטוקנים של עברית), יישור מילים ידועות
-  align.py      שורות, שיבוץ אקורדים, קטעי נגינה, בתים/פזמון
-  theory.py     אקורדים, סולמות, כתיב, קאפו, אצבועים
-  render.py     תצוגה + ייצוא txt/ChordPro/LRC
-  editing.py    קליטת עריכות מה-UI
-  library.py    שמירה על הדיסק
-  jobs.py       תור עבודות, התקדמות, ביטול
-  pipeline.py   הצינור המלא
-  server.py     HTTP API
-scripts/setup_vendor.py   הורדת whisper.cpp והמודל
-tests/                    בדיקות
-```
+---
+
+## 📄 License
+
+See the project files and the licenses of the included third-party components for licensing information.
