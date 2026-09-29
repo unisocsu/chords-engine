@@ -79,7 +79,7 @@ static class Program {
 
         try {
             string oldPath = Environment.GetEnvironmentVariable("PATH") ?? "";
-            Environment.SetEnvironmentVariable("PATH", dir + ";" + oldPath);
+            Environment.SetEnvironmentVariable("PATH", dir + ";" + Path.Combine(dir, "_internal") + ";" + oldPath);
             var psi = new ProcessStartInfo(appPath) {
                 WorkingDirectory = dir,
                 UseShellExecute = false
