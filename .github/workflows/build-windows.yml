@@ -26,15 +26,19 @@ jobs:
           - name: tiny
             model: ggml-tiny-q5_1.bin
             size: "200000000"
+            bundle_model: "1"
           - name: base
             model: ggml-base-q5_1.bin
             size: "300000000"
+            bundle_model: "1"
           - name: small
             model: ggml-small-q5_1.bin
             size: "500000000"
+            bundle_model: "1"
           - name: medium
             model: ggml-medium-q5_0.bin
             size: "539000000"
+            bundle_model: "1"
           - name: nomodel
             model: ggml-medium-q5_0.bin
             size: "539000000"
@@ -55,12 +59,12 @@ jobs:
         env:
           CHORDS_MODEL: ${{ matrix.model }}
           CHORDS_MODEL_SIZE: ${{ matrix.size }}
-          CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model || '1' }}
+          CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model }}
         run: python scripts/setup_vendor.py
       - name: Build EXE
         env:
           CHORDS_MODEL: ${{ matrix.model }}
-          CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model || '1' }}
+          CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model }}
         run: python build_tools/build_exe.py
       - name: Verify PyInstaller output
         shell: pwsh
@@ -74,21 +78,15 @@ jobs:
           $root = "build/dist/ChordsApp"
           $app = Join-Path $root "ChordsApp.exe"
           if (-not (Test-Path -LiteralPath $app)) { throw "PyInstaller executable is missing: $app" }
-
           $pythonDll = Get-ChildItem -LiteralPath $root -Recurse -Filter "python311.dll" -File | Select-Object -First 1
           if ($null -eq $pythonDll) { throw "PyInstaller Python runtime is missing: python311.dll" }
-
           $internal = Join-Path $root "_internal"
-          if (-not (Test-Path -LiteralPath $internal -PathType Container)) {
-            Write-Warning "No _internal directory found; using legacy PyInstaller layout."
-          }
-
+          if (-not (Test-Path -LiteralPath $internal -PathType Container)) { Write-Warning "No _internal directory found; using legacy PyInstaller layout." }
           Write-Host "ChordsApp.exe:"
           Get-Item -LiteralPath $app | Select-Object FullName, Length
           Write-Host "python311.dll:"
           $pythonDll | Select-Object FullName, Length
           Write-Host "Runtime directory: $($pythonDll.DirectoryName)"
-
       - name: Rename EXE
         shell: pwsh
         run: Move-Item -LiteralPath "release/Chords.exe" -Destination "release/Chords-${{ matrix.name }}.exe" -Force
