@@ -72,7 +72,8 @@ static class Program {
         // For the no-model installer, the selected model is stored beside the launcher in Program Files.
         // Copy it into the extracted runtime so the Python app can find it in vendor/models.
         SyncExternalModels(self, dir);
-\n        string appPath = Path.Combine(dir, AppExe);
+
+        string appPath = Path.Combine(dir, AppExe);
         if (!File.Exists(appPath)) {
             string msg = "ChordsApp.exe לא נמצא לאחר הפריסה:\n" + appPath;
             try { File.WriteAllText(Path.Combine(root, "startup_error.txt"), msg, Encoding.UTF8); } catch { }
