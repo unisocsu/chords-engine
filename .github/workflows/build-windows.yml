@@ -96,7 +96,7 @@ jobs:
 
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release-v0.1.0]'))
+    if: ${{ needs.build.result == 'success' && (startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release-v0.1.0]'))) }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -158,15 +158,20 @@ jobs:
 
           תודה על הבדיקות והמשוב!
           EOF
+          set -e
           TAG="${GITHUB_REF_NAME}"
           if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
             TAG="v0.1.0"
-            echo "Replacing tag ${TAG} with ${GITHUB_SHA}"
-            git tag -f "${TAG}" "${GITHUB_SHA}"
-            git push origin "refs/tags/${TAG}" --force
           fi
 
-          echo "Publishing release ${TAG}"
+          echo "Publishing release ${TAG} for commit ${GITHUB_SHA}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch --tags --force
+          git tag -f "${TAG}" "${GITHUB_SHA}"
+          git push origin "refs/tags/${TAG}" --force
+
           if gh release view "${TAG}" >/dev/null 2>&1; then
             gh release upload "${TAG}" release/Chords-*.exe --clobber
           else
