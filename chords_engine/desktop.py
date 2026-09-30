@@ -100,6 +100,15 @@ class Api:
             threading.Thread(target=close_later, daemon=True).start()
         return result
 
+    def open_google_search(self, query: str = ""):
+        """Open Google search in a native WebView window."""
+        import webview
+        from urllib.parse import quote_plus
+        q = str(query or "").strip()
+        url = "https://www.google.com/search?q=" + quote_plus(q or "site:youtube.com שיר")
+        webview.create_window("חיפוש Google", url, width=1200, height=820, min_size=(800, 600))
+        return {"ok": True, "url": url}
+
     def keep_awake(self, on: bool):
         # ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED — מצב הופעה: המסך לא נכבה
         import ctypes
