@@ -21,7 +21,7 @@ SetupIconFile=..\build\icon.ico
 PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64compatible
 Uninstallable=yes
-CreateUninstallRegKey={code:CreateUninstallEntry}
+CreateUninstallRegKey=CreateUninstallEntry
 UpdateUninstallLogAppName=no
 DisableProgramGroupPage=yes
 CloseApplications=yes
@@ -61,6 +61,7 @@ const
 
 var
   ModelChoicePage: TInputOptionWizardPage;
+  ModelSourcePage: TInputOptionWizardPage;
   ModelPage: TInputFileWizardPage;
   DownloadPage: TDownloadWizardPage;
   ModelTarget: string;
@@ -75,7 +76,8 @@ var
   Size, BestSize: Int64;
 begin
   Result := '';
-  if not DirExists(BaseDir) then exit;
+  if not DirExists(BaseDir) then
+    exit;
   BestSize := 0;
 
   if FindFirst(AddBackslash(BaseDir) + '*.bin', Rec) then
@@ -137,26 +139,33 @@ end;
 
 procedure InitializeWizard;
 begin
-  IsUpdateInstaller := GetEnv('CHORDS_INSTALLER_MODE') = 'update';
+  IsUpdateInstaller := IsUpdateMode;
 
   if (not IsUpdateInstaller) and (('{#Variant}' = 'nomodel') or ('{#Variant}' = 'universal')) then
   begin
     ModelChoicePage := CreateInputOptionPage(wpSelectDir,
       'בחירת מודל Whisper',
-      'בחר מודל ואופן התקנה',
-      'בחר את גודל המודל ולאחר מכן אם להוריד אותו או לבחור קובץ מהמחשב.',
+      'בחר גודל מודל',
+      'בחר את גודל מודל Whisper שיותקן עם התוכנה.',
       True, False);
     ModelChoicePage.Add('Tiny — כ־32 MB');
     ModelChoicePage.Add('Base — כ־60 MB');
     ModelChoicePage.Add('Small — כ־190 MB');
     ModelChoicePage.Add('Medium — כ־539 MB');
-    ModelChoicePage.Add('בחר קובץ מודל מהמחשב');
-    ModelChoicePage.Add('הורד את המודל שנבחר מהאינטרנט');
     ModelChoicePage.SelectedValueIndex := 3;
 
-    ModelPage := CreateInputFilePage(ModelChoicePage.ID,
+    ModelSourcePage := CreateInputOptionPage(ModelChoicePage.ID,
+      'מקור המודל',
+      'בחר מאיפה לקבל את המודל',
+      'אפשר לבחור קובץ מודל שכבר נמצא במחשב או להוריד את המודל שנבחר מהאינטרנט.',
+      True, False);
+    ModelSourcePage.Add('בחר קובץ מהמחשב');
+    ModelSourcePage.Add('הורד מהאינטרנט');
+    ModelSourcePage.SelectedValueIndex := 0;
+
+    ModelPage := CreateInputFilePage(ModelSourcePage.ID,
       'בחירת מודל Whisper',
-      'בחר את קובץ מודל Whisper שבו התוכנה תשתמש',
+      'בחר את קובץ מודל Whisper',
       'בחר קובץ ggml-*.bin. הוא יועתק לתיקיית המודלים של ChordsEngine.');
     ModelPage.Add('קובץ מודל:', 'קבצי מודל Whisper (*.bin)|*.bin|כל הקבצים (*.*)|*.*', '.bin');
 
@@ -171,8 +180,10 @@ end;
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   Result := False;
-  if (not IsUpdateInstaller) and (('{#Variant}' = 'nomodel') or ('{#Variant}' = 'universal')) and Assigned(ModelChoicePage) then
-    Result := (PageID = ModelPage.ID) and (ModelChoicePage.SelectedValueIndex < 4);
+  if (not IsUpdateInstaller) and
+     (('{#Variant}' = 'nomodel') or ('{#Variant}' = 'universal')) and
+     Assigned(ModelSourcePage) then
+    Result := (PageID = ModelPage.ID) and (ModelSourcePage.SelectedValueIndex <> 0);
 end;
 
 function SelectedModelInfo(var Name, URL, SHA: string): Boolean;
@@ -193,8 +204,12 @@ var
   Src: string;
 begin
   Result := True;
-  if (not IsUpdateInstaller) and (('{#Variant}' = 'nomodel') or ('{#Variant}' = 'universal')) and (CurPageID = ModelPage.ID) and
-     (ModelChoicePage.SelectedValueIndex = 4) then
+
+  if (not IsUpdateInstaller) and
+     (('{#Variant}' = 'nomodel') or ('{#Variant}' = 'universal')) and
+     Assigned(ModelSourcePage) and
+     (CurPageID = ModelPage.ID) and
+     (ModelSourcePage.SelectedValueIndex = 0) then
   begin
     Src := ModelPage.Values[0];
     if (Src = '') or (not FileExists(Src)) then
@@ -215,7 +230,7 @@ begin
     TargetDir := ExpandConstant('{app}\models');
     ForceDirectories(TargetDir);
 
-    if ModelChoicePage.SelectedValueIndex = 4 then
+    if ModelSourcePage.SelectedValueIndex = 0 then
       Src := ModelPage.Values[0]
     else
     begin
@@ -224,6 +239,7 @@ begin
         MsgBox('לא נבחר מודל תקין.', mbError, MB_OK);
         Abort;
       end;
+
       DownloadPage.Clear;
       DownloadPage.Add(ModelURL, ModelName, ModelSHA);
       DownloadPage.Show;
@@ -235,17 +251,19 @@ begin
         Abort;
       end;
       DownloadPage.Hide;
-      Src := ExpandConstant('{tmp}\') + ModelName;
+      Src := AddBackslash(ExpandConstant('{tmp}')) + ModelName;
     end;
 
     Target := AddBackslash(TargetDir) + ExtractFileName(Src);
     if FileExists(Target) then
       DeleteFile(Target);
+
     if not FileCopy(Src, Target, False) then
     begin
       MsgBox('העתקת המודל נכשלה.', mbError, MB_OK);
       Abort;
     end;
+
     ModelTarget := Target;
   end;
 
