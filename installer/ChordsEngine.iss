@@ -15,6 +15,7 @@ OutputBaseFilename=ChordsEngine-{#Variant}-Installer
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\build\icon.ico
 PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64compatible
 Uninstallable=yes
