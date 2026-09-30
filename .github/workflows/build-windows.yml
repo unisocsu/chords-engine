@@ -151,7 +151,7 @@ jobs:
 
 
   release:
-    if: ${{ always() && (startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release-v0.1.0]')) || (github.event_name == 'workflow_dispatch' && inputs.release_from_run_id != '')) }}
+    if: ${{ always() && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_from_run_id != '')) }}
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -267,11 +267,18 @@ jobs:
           תודה על הבדיקות והמשוב!
           EOF
           set -e
-          TAG="${GITHUB_REF_NAME}"
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            TAG="v0.1.0"
-          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            TAG="v0.1.0"
+            TAG="${{ inputs.release_tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release tag: $TAG"
+            exit 1
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; refusing to replace it."
+            exit 1
           fi
 
           echo "Publishing release ${TAG} for commit ${GITHUB_SHA}"
@@ -279,11 +286,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git fetch --tags --force
-          git tag -f "${TAG}" "${GITHUB_SHA}"
-          git push origin "refs/tags/${TAG}" --force
+          git tag "${TAG}" "${GITHUB_SHA}"
+          git push origin "refs/tags/${TAG}"
 
-          if gh release view "${TAG}" >/dev/null 2>&1; then
-            gh release upload "${TAG}" release/*.exe --clobber
-          else
-            gh release create "${TAG}" release/*.exe --title "ChordsEngine ${TAG} — First public release" --notes-file release-notes.md
-          fi
+          gh release create "${TAG}" release/*.exe --title "ChordsEngine ${TAG}" --notes-file release-notes.md
