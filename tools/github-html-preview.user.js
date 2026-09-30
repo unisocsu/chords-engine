@@ -1,8 +1,10 @@
 // ==UserScript==
-// @name         GitHub HTML Landing Page Preview
+// @name         GitHub.io Local HTML Loader
 // @namespace    chords-engine-windows
-// @version      1.0.0
-// @description  Renders HTML files from GitHub.com as real pages, including relative CSS/JS/images.
+// @version      2.0.0
+// @description  Downloads a GitHub Pages index.html and opens it locally.
+// @match        https://*.github.io/*
+// @match        http://*.github.io/*
 // @match        https://github.com/*/*/blob/*/*.html
 // @match        https://github.com/*/*/blob/*/*.htm
 // @grant        GM_xmlhttpRequest
@@ -13,89 +15,145 @@
 (function () {
   'use strict';
 
-  const m = location.pathname.match(/^\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+\.(?:html?|HTML?))$/);
-  if (!m) return;
-
-  const owner = m[1];
-  const repo = m[2];
-  const branch = m[3];
-  const filePath = m[4];
-
-  // Don't interfere with GitHub navigation until the user explicitly opens an HTML file.
-  const apiUrl = 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' +
-                 encodeURIComponent(repo) + '/contents/' +
-                 filePath.split('/').map(encodeURIComponent).join('/') +
-                 '?ref=' + encodeURIComponent(branch);
-
-  function request(url, onload, onerror) {
+  function request(url, done, fail) {
     GM_xmlhttpRequest({
       method: 'GET',
-      url,
-      headers: { 'Accept': 'application/vnd.github+json' },
-      onload,
-      onerror
+      url: url,
+      headers: { Accept: 'application/vnd.github+json' },
+      onload: done,
+      onerror: fail
     });
   }
 
-  function fail(message) {
-    document.documentElement.innerHTML =
-      '<body style="margin:0;background:#0b1020;color:#fff;font:16px system-ui;padding:40px">' +
-      '<h1>GitHub HTML Preview</h1><p>' + message + '</p></body>';
+  function decodeBase64(value) {
+    const binary = atob(value.replace(/\s/g, ''));
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
   }
 
-  request(apiUrl, function (res) {
-    if (res.status < 200 || res.status >= 300) {
-      fail('לא הצלחתי לקרוא את קובץ ה־HTML מ־GitHub. HTTP ' + res.status);
+  function openLocal(html) {
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const tab = window.open(url, '_blank');
+
+    if (!tab) {
+      alert('הדפדפן חסם פתיחת טאב חדש. אפשר pop-ups עבור github.io.');
+      URL.revokeObjectURL(url);
       return;
     }
 
-    let data;
-    try { data = JSON.parse(res.responseText); } catch (_) {
-      fail('GitHub החזיר תשובה לא תקינה.');
-      return;
-    }
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
 
-    if (!data.content) {
-      fail('לא נמצא תוכן HTML בקובץ.');
-      return;
-    }
+  function errorPage(message) {
+    document.documentElement.innerHTML =
+      '<body dir="rtl" style="margin:0;background:#0b1020;color:white;font:16px system-ui;padding:40px">' +
+      '<h1>GitHub.io Local Loader</h1><p>' + message + '</p></body>';
+  }
 
-    let html;
-    try {
-      html = atob(data.content.replace(/\s/g, ''));
-      html = decodeURIComponent(escape(html));
-    } catch (_) {
-      fail('לא הצלחתי לפענח את קובץ ה־HTML.');
-      return;
-    }
+  function rewriteAssets(html, owner, repo, branch, filePath) {
+    const directory = filePath.substring(0, filePath.lastIndexOf('/') + 1);
+    const rawBase =
+      'https://raw.githubusercontent.com/' + owner + '/' + repo + '/' +
+      branch + '/' + directory;
 
-    const base = 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/' +
-                 branch + '/' + filePath.substring(0, filePath.lastIndexOf('/') + 1);
-
-    // Make relative assets work when the HTML is rendered on GitHub.com.
-    html = html.replace(/(<base[^>]*href=)["'][^"']*["']/gi, '');
-    html = html.replace(/(href|src|action)=(['"])(?!https?:|data:|#|\/)([^'"]+)\2/gi,
+    html = html.replace(/<base[^>]*>/gi, '');
+    return html.replace(
+      /(href|src|poster|action)=(['"])(?!https?:|data:|blob:|#|\/)([^'"]+)\2/gi,
       function (_, attr, quote, value) {
         try {
-          return attr + '=' + quote + new URL(value, base).href + quote;
+          return attr + '=' + quote + new URL(value, rawBase).href + quote;
         } catch (_) {
           return _;
         }
-      });
+      }
+    );
+  }
 
-    document.open();
-    document.write(html);
-    document.close();
+  function githubPages() {
+    const hostMatch = location.hostname.match(/^([^.]+)\.github\.io$/);
+    if (!hostMatch) return;
 
-    // Show a tiny unobtrusive badge so it's obvious why the GitHub page changed.
-    const badge = document.createElement('div');
-    badge.textContent = 'GitHub HTML Preview';
-    badge.style.cssText =
-      'position:fixed;bottom:10px;left:10px;z-index:2147483647;' +
-      'padding:5px 9px;border-radius:8px;background:#111827;color:#9ca3af;' +
-      'font:11px system-ui;opacity:.8;pointer-events:none';
-    document.body.appendChild(badge);
-  }, function () {
-    fail('הבקשה ל־GitHub נכשלה.');
-  });
+    const owner = hostMatch[1];
+    const parts = location.pathname.split('/').filter(Boolean);
+
+    // For a project GitHub Pages site: owner.github.io/repository/
+    const repo = parts.length ? parts[0] : owner;
+    const subPath = parts.length ? parts.slice(1).join('/') : '';
+    const filePath = subPath
+      ? 'docs/' + subPath.replace(/\/$/, '') + '/index.html'
+      : 'docs/index.html';
+
+    const apiUrl =
+      'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' +
+      encodeURIComponent(repo) + '/contents/' +
+      filePath.split('/').map(encodeURIComponent).join('/') + '?ref=main';
+
+    request(apiUrl, function (res) {
+      if (res.status < 200 || res.status >= 300) {
+        errorPage('לא הצלחתי למצוא את index.html ב־GitHub (HTTP ' + res.status + ').');
+        return;
+      }
+
+      let data;
+      try { data = JSON.parse(res.responseText); } catch (_) {
+        errorPage('GitHub החזיר תשובה לא תקינה.');
+        return;
+      }
+
+      if (!data.content) {
+        errorPage('לא נמצא תוכן index.html.');
+        return;
+      }
+
+      let html;
+      try { html = decodeBase64(data.content); } catch (_) {
+        errorPage('לא הצלחתי לפענח את index.html.');
+        return;
+      }
+
+      html = rewriteAssets(html, owner, repo, 'main', filePath);
+      openLocal(html);
+    }, function () {
+      errorPage('הבקשה ל־GitHub נכשלה.');
+    });
+  }
+
+  function githubBlob() {
+    const match = location.pathname.match(
+      /^\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+\.(?:html?|HTML?))$/
+    );
+    if (!match) return;
+
+    const owner = match[1];
+    const repo = match[2];
+    const branch = match[3];
+    const filePath = match[4];
+
+    const apiUrl =
+      'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' +
+      encodeURIComponent(repo) + '/contents/' +
+      filePath.split('/').map(encodeURIComponent).join('/') +
+      '?ref=' + encodeURIComponent(branch);
+
+    request(apiUrl, function (res) {
+      if (res.status < 200 || res.status >= 300) return;
+
+      let data;
+      try { data = JSON.parse(res.responseText); } catch (_) { return; }
+      if (!data.content) return;
+
+      let html;
+      try { html = decodeBase64(data.content); } catch (_) { return; }
+
+      html = rewriteAssets(html, owner, repo, branch, filePath);
+      openLocal(html);
+    });
+  }
+
+  if (/\.github\.io$/.test(location.hostname)) {
+    githubPages();
+  } else if (location.hostname === 'github.com') {
+    githubBlob();
+  }
 })();
