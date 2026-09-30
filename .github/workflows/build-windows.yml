@@ -61,6 +61,24 @@ jobs:
           CHORDS_MODEL_SIZE: ${{ matrix.size }}
           CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model }}
         run: python scripts/setup_vendor.py
+      - name: Generate Windows icon
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Drawing
+          $src = [System.Drawing.Image]::FromFile((Join-Path $env:GITHUB_WORKSPACE "icon.jpg"))
+          $bmp = New-Object System.Drawing.Bitmap 256,256
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.DrawImage($src, 0, 0, 256, 256)
+          $g.Dispose()
+          $src.Dispose()
+          $icon = [System.Drawing.Icon]::FromHandle($bmp.GetHicon())
+          $stream = [System.IO.File]::Create((Join-Path $env:GITHUB_WORKSPACE "build/icon.ico"))
+          $icon.Save($stream)
+          $stream.Dispose()
+          $icon.Dispose()
+          $bmp.Dispose()
+          if (-not (Test-Path "build/icon.ico")) { throw "Failed to create build/icon.ico" }
+
       - name: Build EXE
         env:
           CHORDS_MODEL: ${{ matrix.model }}
