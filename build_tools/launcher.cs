@@ -84,6 +84,9 @@ static class Program {
         try {
             string oldPath = Environment.GetEnvironmentVariable("PATH") ?? "";
             Environment.SetEnvironmentVariable("PATH", dir + ";" + Path.Combine(dir, "_internal") + ";" + oldPath);
+            string launcherName = Path.GetFileNameWithoutExtension(self).ToLowerInvariant();
+            string variant = launcherName.StartsWith("chords-") ? launcherName.Substring("chords-".Length) : "";
+            if (!string.IsNullOrEmpty(variant)) Environment.SetEnvironmentVariable("CHORDS_VARIANT", variant);
             var psi = new ProcessStartInfo(appPath) {
                 WorkingDirectory = dir,
                 UseShellExecute = false
