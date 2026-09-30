@@ -68,7 +68,7 @@ def _request_json(url: str) -> dict:
     req = urllib.request.Request(url, headers={
         "Accept": "application/vnd.github+json",
         "User-Agent": "ChordsEngine-Updater",
-        "X-GitHub-Api-Version": "2026-03-10",
+        "X-GitHub-Api-Version": "2022-11-28",
     })
     with urllib.request.urlopen(req, timeout=12) as r:
         return json.loads(r.read().decode("utf-8"))
