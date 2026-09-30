@@ -65,6 +65,7 @@ jobs:
         shell: pwsh
         run: |
           Add-Type -AssemblyName System.Drawing
+          New-Item -ItemType Directory -Force -Path (Join-Path $env:GITHUB_WORKSPACE "build") | Out-Null
           $src = [System.Drawing.Image]::FromFile((Join-Path $env:GITHUB_WORKSPACE "icon.jpg"))
           $bmp = New-Object System.Drawing.Bitmap 256,256
           $g = [System.Drawing.Graphics]::FromImage($bmp)
