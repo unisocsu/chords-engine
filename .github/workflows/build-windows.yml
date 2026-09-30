@@ -159,7 +159,7 @@ jobs:
         env:
           CHORDS_INSTALLER_EXE: Chords-nomodel.exe
           CHORDS_INSTALLER_TARGET_EXE: Chords-nomodel.exe
-          CHORDS_INSTALLER_VARIANT: universal
+          CHORDS_INSTALLER_VARIANT: nomodel
           CHORDS_INSTALLER_OUTPUT: ChordsEngine-Universal-Installer
           CHORDS_INSTALLER_MODE: full
           CHORDS_APP_VERSION: "0.2.0"
