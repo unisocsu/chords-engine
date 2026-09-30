@@ -1,4 +1,3 @@
-<div align="center">
 
 # 🎸 ChordsEngine Windows
 
@@ -20,7 +19,6 @@
 ![Whisper](https://img.shields.io/badge/Whisper-whisper.cpp-8A2BE2)
 ![Offline](https://img.shields.io/badge/Processing-Offline-2EA44F)
 
-</div>
 
 ---
 
@@ -65,13 +63,10 @@
 
 במהדורת **No Model** המתקין מאפשר לבחור קובץ Whisper קיים ולהעתיק אותו לתיקיית התוכנה. המתקין יוצר גם קיצור דרך בתפריט התחל ובשולחן העבודה.
 
-<div align="center">
 
 ### 🚀 רוצה לנסות?
 
 [**⬇️ עבור לכל ההורדות ב־GitHub Releases**](https://github.com/unisocsu/chords-engine-windows/releases)
-
-</div>
 
 ---
 
