@@ -176,3 +176,8 @@ Original project attribution is intentionally preserved.
 [**Source Code**](https://github.com/unisocsu/chords-engine-windows)
 
 </div>
+
+
+## Release v0.1.0
+
+First public preview release: five Windows editions, including a No Model edition and installers.
