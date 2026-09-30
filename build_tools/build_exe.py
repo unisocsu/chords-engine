@@ -61,10 +61,13 @@ def vendor():
     rel = src / "whisper" / "Release"
     for f in WHISPER_FILES + [p.name for p in rel.glob("ggml-cpu-*.dll")]:
         shutil.copy2(rel / f, wdst / f)
+    mdst = DIST / "vendor" / "models"
     if BUNDLE_MODEL:
-        mdst = DIST / "vendor" / "models"
         mdst.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src / "models" / MODEL, mdst / MODEL)
+    elif mdst.exists():
+        # Update builds intentionally contain no Whisper model.
+        shutil.rmtree(mdst)
 
 
 def pack() -> Path:
