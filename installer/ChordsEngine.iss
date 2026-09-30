@@ -21,6 +21,8 @@ SetupIconFile=..\build\icon.ico
 PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64compatible
 Uninstallable=yes
+CreateUninstallRegKey={code:CreateUninstallEntry}
+UpdateUninstallLogAppName=no
 DisableProgramGroupPage=yes
 CloseApplications=yes
 RestartApplications=no
@@ -33,6 +35,16 @@ Name: "{group}\ChordsEngine {#Variant}"; Filename: "{app}\{#TargetExe}"
 Name: "{autodesktop}\ChordsEngine {#Variant}"; Filename: "{app}\{#TargetExe}"
 
 [Code]
+function IsUpdateMode: Boolean;
+begin
+  Result := GetEnv('CHORDS_INSTALLER_MODE') = 'update';
+end;
+
+function CreateUninstallEntry: Boolean;
+begin
+  Result := not IsUpdateMode;
+end;
+
 var
   ModelPage: TInputFileWizardPage;
   ModelTarget: string;
