@@ -21,6 +21,7 @@ DIST = BUILD / "dist" / "ChordsApp"
 OUT = ROOT / "release" / "Chords.exe"
 SITE = Path(sys.prefix)
 CSC = Path(r"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe")
+ICON = ROOT / "build" / "icon.ico"
 WHISPER_FILES = ["whisper-cli.exe", "whisper.dll", "ggml.dll", "ggml-base.dll"]
 MODEL = os.environ.get("CHORDS_MODEL", "ggml-medium-q5_0.bin")
 BUNDLE_MODEL = os.environ.get("CHORDS_BUNDLE_MODEL", "1") == "1"
@@ -44,6 +45,8 @@ def pyinstaller():
            "--collect-all", "lv_chordia", "--collect-submodules", "librosa", "--collect-data", "librosa",
            "--collect-all", "webview", "--hidden-import", "clr", "--hidden-import", "soundfile",
            "--collect-binaries", "av", "--collect-submodules", "av"]
+    if ICON.exists():
+        cmd += ["--icon", str(ICON)]
     for e in EXCLUDES:
         cmd += ["--exclude-module", e]
     cmd.append(str(ROOT / "chords_app.py"))
@@ -79,10 +82,13 @@ def pack() -> Path:
 def launcher(payload: Path):
     step("launcher")
     exe = BUILD / "launcher.exe"
-    subprocess.run([str(CSC), "/nologo", "/target:winexe", "/optimize+", f"/out:{exe}",
+    csc_cmd = [str(CSC), "/nologo", "/target:winexe", "/optimize+", f"/out:{exe}",
                     "/r:System.IO.Compression.dll", "/r:System.IO.Compression.FileSystem.dll",
-                    "/r:System.Windows.Forms.dll", "/r:System.Drawing.dll",
-                    str(ROOT / "build_tools" / "launcher.cs")], check=True)
+                    "/r:System.Windows.Forms.dll", "/r:System.Drawing.dll"]
+    if ICON.exists():
+        csc_cmd.append(f"/win32icon:{ICON}")
+    csc_cmd.append(str(ROOT / "build_tools" / "launcher.cs"))
+    subprocess.run(csc_cmd, check=True)
     from chords_engine import __version__
     ver = f"{__version__}-{time.strftime('%Y%m%d%H%M%S')}".encode("ascii")[:24].ljust(24, b"\0")
     OUT.parent.mkdir(exist_ok=True)
