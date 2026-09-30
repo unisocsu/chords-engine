@@ -194,3 +194,7 @@ dialog textarea { width: 100%; min-width: 520px; direction: rtl; }
   body { background: #fff; color: #000; } .facts span:last-child { display: none; }
 }
 table.songs .cover { width: 34px; height: 34px; font-size: 15px; border-radius: 5px; }
+
+/* YouTube / Google import */
+.yt-row{display:flex;gap:8px;align-items:center;margin:12px 0}.yt-row input{flex:1;min-width:0;direction:ltr}.yt-row button{white-space:nowrap}
+#dlgYoutube{min-width:min(760px,90vw)}
