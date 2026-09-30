@@ -153,6 +153,32 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Build Universal Installer
+        if: matrix.name == 'nomodel'
+        shell: pwsh
+        env:
+          CHORDS_INSTALLER_EXE: Chords-nomodel.exe
+          CHORDS_INSTALLER_TARGET_EXE: Chords-nomodel.exe
+          CHORDS_INSTALLER_VARIANT: universal
+          CHORDS_INSTALLER_OUTPUT: ChordsEngine-Universal-Installer
+          CHORDS_INSTALLER_MODE: full
+          CHORDS_APP_VERSION: "0.2.0"
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          & $iscc "installer\ChordsEngine.iss"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path "release\ChordsEngine-Universal-Installer.exe")) { throw "Universal installer was not created" }
+
+      - name: Upload Universal Installer
+        if: matrix.name == 'nomodel'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chords-Windows-Universal-Installer
+          path: release/ChordsEngine-Universal-Installer.exe
+          if-no-files-found: error
+          retention-days: 14
+
+
       - name: Build lightweight Update EXE
         shell: pwsh
         env:
@@ -271,6 +297,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-nomodel-Installer
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Universal Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-Universal-Installer
           path: release
           run-id: ${{ inputs.release_from_run_id || github.run_id }}
           github-token: ${{ github.token }}
