@@ -1020,6 +1020,65 @@ $("btnCancelUpdate").onclick = cancelUpdateDownload;
 $("updateDownload").onclick = startUpdateDownload;
 $("updateLater").onclick = () => $("dlgUpdate").close();
 
+// ------------------------------------------------------------------ YouTube / Google
+$("btnYoutube").onclick = () => {
+  $("ytLevel").value = S.settings.level;
+  $("ytStatus").textContent = "";
+  $("ytProgress").classList.add("hidden");
+  $("ytUrl").focus();
+  $("dlgYoutube").showModal();
+};
+$("ytCancel").onclick = () => $("dlgYoutube").close();
+$("ytGoogle").onclick = () => {
+  const q = $("ytUrl").value.trim();
+  if (native()) native().open_google_search(q || "YouTube שיר");
+  else window.open("https://www.google.com/search?q=" + encodeURIComponent(q || "YouTube שיר"), "_blank", "noopener");
+};
+let ytPoll = null;
+$("ytDownload").onclick = async () => {
+  const url = $("ytUrl").value.trim();
+  if (!url) return toast("הדבק קישור YouTube");
+  const options = Object.assign({}, LEVELS[$("ytLevel").value]);
+  $("ytDownload").disabled = true;
+  $("ytProgress").classList.remove("hidden");
+  $("ytStatus").textContent = "מתחיל הורדה…";
+  try {
+    const j = await api("POST", "/youtube/download", { url, options });
+    clearInterval(ytPoll);
+    ytPoll = setInterval(async () => {
+      const st = await api("GET", "/youtube/jobs/" + j.id).catch(() => null);
+      if (!st) return;
+      if (st.status === "queued" || st.status === "downloading") {
+        const pct = Math.round((st.progress || 0) * 100);
+        $("ytBar").style.width = pct + "%";
+        $("ytStatus").textContent = "מוריד מ־YouTube… " + pct + "%";
+      } else if (st.status === "downloaded" || st.status === "analyzing") {
+        $("ytBar").style.width = "100%";
+        const aj = st.analysis;
+        const pct = aj ? Math.round((aj.progress || 0) * 100) : 0;
+        $("ytStatus").textContent = "הורד. מנתח… " + pct + "%";
+      } else if (st.status === "done") {
+        clearInterval(ytPoll);
+        $("ytDownload").disabled = false;
+        $("ytStatus").textContent = "הניתוח הסתיים.";
+        $("ytBar").style.width = "100%";
+        await loadSongs();
+        $("dlgYoutube").close();
+        if (st.song_id) await openSong(st.song_id);
+      } else if (st.status === "error" || st.status === "cancelled") {
+        clearInterval(ytPoll);
+        $("ytDownload").disabled = false;
+        $("ytStatus").textContent = "שגיאה: " + (st.error || st.status);
+        toast("הורדת YouTube נכשלה: " + (st.error || st.status), 7000);
+      }
+    }, 500);
+  } catch (e) {
+    $("ytDownload").disabled = false;
+    $("ytStatus").textContent = "שגיאה: " + e.message;
+    toast("שגיאה: " + e.message, 6000);
+  }
+};
+
 // ------------------------------------------------------------------ הפעלה
 async function init() {
   applySettings();
