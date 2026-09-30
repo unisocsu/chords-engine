@@ -43,7 +43,7 @@ def pyinstaller():
            "--add-data", f"{ROOT / 'chords_engine' / 'ui'}{sep}chords_engine/ui",
            "--add-data", f"{SITE / 'share' / 'lv-chordia' / 'cache_data'}{sep}share/lv-chordia/cache_data",
            "--collect-all", "lv_chordia", "--collect-submodules", "librosa", "--collect-data", "librosa",
-           "--collect-all", "webview", "--hidden-import", "clr", "--hidden-import", "soundfile",
+           "--collect-all", "webview", "--collect-all", "yt_dlp", "--hidden-import", "clr", "--hidden-import", "soundfile",
            "--collect-binaries", "av", "--collect-submodules", "av"]
     if ICON.exists():
         cmd += ["--icon", str(ICON)]
