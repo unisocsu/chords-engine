@@ -11,7 +11,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
 
-from . import __version__, audio, config, library, pipeline, render, theory
+from . import __version__, audio, config, library, pipeline, render, theory, youtube
 from .editing import apply_edits
 from .jobs import JobQueue
 
@@ -179,6 +179,18 @@ class Handler(BaseHTTPRequestHandler):
 
     def health(self, q):
         self._json({"ok": True, "version": __version__, "time": time.time()})
+
+    def youtube_download(self, q):
+        b = self._body()
+        url = (b.get("url") or "").strip()
+        options = dict(b.get("options") or {})
+        self._json(youtube.start(url, options), 202)
+
+    def youtube_status(self, q, jid):
+        job = youtube.enrich_status(jid)
+        if not job:
+            raise ApiError(404, "הורדת YouTube לא נמצאה")
+        self._json(job)
 
     def get_config(self, q):
         self._json({
@@ -403,6 +415,8 @@ ROUTES = [
     (r"/api/songs/([0-9a-f]+)/cover", "GET", Handler.cover),
     (r"/api/health", "GET", Handler.health),
     (r"/api/config", "GET", Handler.get_config),
+    (r"/api/youtube/download", "POST", Handler.youtube_download),
+    (r"/api/youtube/jobs/([0-9a-f]+)", "GET", Handler.youtube_status),
     (r"/api/analyze", "POST", Handler.analyze),
     (r"/api/upload", "POST", Handler.upload),
     (r"/api/jobs", "GET", Handler.list_jobs),
