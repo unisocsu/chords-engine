@@ -13,6 +13,7 @@ import urllib.request
 from pathlib import Path
 
 from . import __version__, config
+from . import update
 
 TITLE = "אקורדים"
 AUDIO_FILTER = ("קבצי שמע ווידאו (*.mp3;*.wav;*.flac;*.m4a;*.aac;*.ogg;*.opus;*.wma;*.mp4;*.mkv;*.webm;*.avi;*.mov)",
@@ -71,6 +72,33 @@ class Api:
 
     def fullscreen(self):
         self._window.toggle_fullscreen()
+
+    def update_settings(self):
+        return update.settings()
+
+    def save_update_settings(self, data):
+        return update.save_settings(data or {})
+
+    def check_for_updates(self, force=False):
+        return update.check(bool(force))
+
+    def start_update_download(self, asset, version):
+        return update.start_download(asset or {}, str(version or ""))
+
+    def update_status(self):
+        return update.status()
+
+    def cancel_update_download(self):
+        return update.cancel_download()
+
+    def install_update(self):
+        result = update.install_downloaded()
+        if result.get("ok"):
+            def close_later():
+                time.sleep(1.0)
+                os._exit(0)
+            threading.Thread(target=close_later, daemon=True).start()
+        return result
 
     def keep_awake(self, on: bool):
         # ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED — מצב הופעה: המסך לא נכבה
