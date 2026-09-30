@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ChordsEngine Windows</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090d18;color:#f4f7ff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1050px;margin:auto;padding:70px 22px}.hero{text-align:center;padding:55px 20px 70px}
+h1{font-size:clamp(42px,8vw,78px);margin:0 0 16px;background:linear-gradient(90deg,#8b7cff,#45d6c8);-webkit-background-clip:text;color:transparent}
+h2{font-size:32px;margin-top:60px}.lead{font-size:21px;color:#b9c2d8;max-width:720px;margin:0 auto 28px;line-height:1.7}
+.btn{display:inline-block;margin:7px;padding:13px 22px;border-radius:12px;text-decoration:none;color:white;background:#6d5dfc;font-weight:700}.btn.alt{background:#172036}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}.card{background:#11182a;border:1px solid #24304a;border-radius:18px;padding:24px}.card h3{margin-top:0}.muted{color:#aab4ca;line-height:1.65}
+table{width:100%;border-collapse:collapse;background:#11182a;border-radius:16px;overflow:hidden}th,td{padding:15px;text-align:right;border-bottom:1px solid #26324a}th{background:#171f34}
+footer{text-align:center;color:#7f8aa2;padding:50px 0 20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="hero">
+<h1>🎸 ChordsEngine</h1>
+<p class="lead">מילים ואקורדים. ישירות מהשיר.<br>תוכנת Windows לניתוח שירים, תמלול מילים וזיהוי אקורדים לגיטרה — מקומית ובאופן לא מקוון.</p>
+<a class="btn" href="https://github.com/unisocsu/chords-engine-windows/releases">⬇️ הורדות</a>
+<a class="btn alt" href="https://github.com/unisocsu/chords-engine-windows">GitHub</a>
+</section>
+<h2>יכולות</h2>
+<div class="grid">
+<div class="card"><h3>🎵 מילות שירים</h3><p class="muted">תמלול אודיו באמצעות whisper.cpp.</p></div>
+<div class="card"><h3>🎸 אקורדים</h3><p class="muted">זיהוי אקורדים והצמדתם למילים לפי זמן.</p></div>
+<div class="card"><h3>🎼 מידע מוזיקלי</h3><p class="muted">סולם, קצב, פעמות וטרנספוזיציה.</p></div>
+<div class="card"><h3>📴 Offline</h3><p class="muted">העיבוד מתבצע מקומית על מחשב Windows.</p></div>
+</div>
+<h2>מהדורות</h2>
+<table><tr><th>מהדורה</th><th>מודל</th><th>תיאור</th></tr>
+<tr><td><b>Tiny</b></td><td>כלול</td><td>המהדורה הקטנה ביותר</td></tr>
+<tr><td><b>Base</b></td><td>כלול</td><td>מהדורה קלה</td></tr>
+<tr><td><b>Small</b></td><td>כלול</td><td>איזון בין גודל ואיכות</td></tr>
+<tr><td><b>Medium</b></td><td>כלול</td><td>איכות תמלול גבוהה יותר</td></tr>
+<tr><td><b>No Model</b></td><td>לא כלול</td><td>בחירת מודל בזמן ההתקנה</td></tr>
+</table>
+<h2>English</h2>
+<div class="card"><h3>ChordsEngine Windows</h3><p class="muted">Windows software for song lyrics, audio transcription and guitar chord detection. Built around whisper.cpp and local processing. Five Windows editions are produced on every build, including a No Model edition for users who already have a compatible Whisper model.</p></div>
+<h2>קרדיטים</h2>
+<div class="card"><p class="muted">ChordsEngine Windows is a fork and continued development of the original chord-and-lyrics engine built with <b>Claude Code by @tsoolgee</b>.</p></div>
+<footer>ChordsEngine Windows · <a href="https://github.com/unisocsu/chords-engine-windows" style="color:#8b7cff">GitHub</a></footer>
+</div>
+</body>
+</html>
