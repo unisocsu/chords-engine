@@ -10,6 +10,14 @@ on:
         description: "Existing successful build workflow run ID to use for the release"
         required: false
         default: ""
+      release_tag:
+        description: "New release tag, for example v0.2.0"
+        required: false
+        default: "v0.2.0"
+      release_description:
+        description: "Release description in Markdown"
+        required: false
+        default: "גרסת Preview חדשה של ChordsEngine Windows."
 
 # First public release trigger: [release-v0.1.0]
 
@@ -231,41 +239,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cat > release-notes.md <<'EOF'
-          # ChordsEngine — First public release
-
-          תוכנת אקורדים ומילים לשירים בעברית — גרסת EXE ראשונה.
-
-          ## ⚠️ סטטוס הפיתוח
-          הפרויקט עדיין נמצא בשלבי פיתוח. זו גרסת Preview ראשונה לצורך בדיקות ומשוב.
-          חבילות ההתקנה כוללות Python והמשתמש אינו צריך להתקין Python בנפרד.
-
-          ## ארבעת המודלים
-          | מודל | גודל משוער | למי מומלץ |
-          |---|---:|---|
-          | Tiny | ~200 MB | מחשבים חלשים מאוד ובדיקות מהירות; עדיפות למהירות על פני דיוק |
-          | Base | ~300 MB | מחשבים חלשים יחסית ושימוש בסיסי |
-          | Small | ~500 MB | איזון בין איכות, מהירות ומשאבים |
-          | Medium | ~539 MB | כאשר רוצים תמלול איכותי יותר ומוכנים להשקיע יותר זמן CPU |
-          | No Model | קטן משמעותית | למי שכבר מחזיק את המודל במחשב |
-
-          גודל הקובץ אינו מדד ישיר לאיכות. הביצועים תלויים גם במחשב ובאיכות ההקלטה.
-
-          ## מה כלול
-          - תמלול באמצעות whisper.cpp.
-          - זיהוי אקורדים באמצעות lv-chordia.
-          - שילוב המילים והאקורדים לדף אקורדים.
-          - חמש גרסאות EXE: Tiny, Base, Small, Medium וגרסה ללא מודל.
-
-          ## בהמשך
-          נוסיף מודלים כבדים וחזקים יותר, כולל מודלים ממשפחת Large, לצד שיפורים בדיוק, בביצועים ובממשק.
-
-          ## איזה מודל לבחור?
-          אם אינך בטוח, מומלץ לבדוק קודם את Small. אם הדיוק עדיין לא מספיק, נסה Medium.
-          אם המחשב חלש או שהמהירות חשובה במיוחד, נסה Base או Tiny.
-
-          תודה על הבדיקות והמשוב!
-          EOF
+          printf "%s\\n" "${{ inputs.release_description }}" > release-notes.md
           set -e
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
             TAG="${{ inputs.release_tag }}"
