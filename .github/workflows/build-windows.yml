@@ -131,7 +131,11 @@ jobs:
         shell: pwsh
         env:
           CHORDS_INSTALLER_EXE: Chords-${{ matrix.name }}.exe
+          CHORDS_INSTALLER_TARGET_EXE: Chords-${{ matrix.name }}.exe
           CHORDS_INSTALLER_VARIANT: ${{ matrix.name }}
+          CHORDS_INSTALLER_OUTPUT: ChordsEngine-${{ matrix.name }}-Installer
+          CHORDS_INSTALLER_MODE: full
+          CHORDS_APP_VERSION: "0.2.0"
         run: |
           $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path -LiteralPath $iscc)) { throw "Inno Setup compiler not found: $iscc" }
