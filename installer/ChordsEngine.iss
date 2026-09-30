@@ -56,22 +56,21 @@ function FindNewestModelInDir(BaseDir: string): string;
 var
   Rec: TFindRec;
   Child, Candidate: string;
-  BestTime, T: Integer;
+  Size, BestSize: Int64;
 begin
   Result := '';
   if not DirExists(BaseDir) then exit;
-  BestTime := 0;
+  BestSize := 0;
 
   if FindFirst(AddBackslash(BaseDir) + '*.bin', Rec) then
   begin
     try
       repeat
         Candidate := AddBackslash(BaseDir) + Rec.Name;
-        T := Rec.LastWriteTime;
-        if (FileSize64(Candidate) > 100000) and ((Result = '') or (T > BestTime)) then
+        if FileSize64(Candidate, Size) and (Size > 100000) and (Size > BestSize) then
         begin
           Result := Candidate;
-          BestTime := T;
+          BestSize := Size;
         end;
       until not FindNext(Rec);
     finally
@@ -83,15 +82,18 @@ begin
   begin
     try
       repeat
-        if (Rec.Name <> '.') and (Rec.Name <> '..') and Rec.Attributes and FILE_ATTRIBUTE_DIRECTORY <> 0 then
+        if (Rec.Name <> '.') and (Rec.Name <> '..') and
+           ((Rec.Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0) then
         begin
           Child := AddBackslash(BaseDir) + Rec.Name;
           Candidate := FindNewestModelInDir(Child);
           if Candidate <> '' then
           begin
-            T := FileSize64(Candidate);
-            if (Result = '') or (T > FileSize64(Result)) then
+            if FileSize64(Candidate, Size) and (Size > BestSize) then
+            begin
               Result := Candidate;
+              BestSize := Size;
+            end;
           end;
         end;
       until not FindNext(Rec);
