@@ -149,11 +149,46 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Build lightweight Update EXE
+        shell: pwsh
+        env:
+          CHORDS_MODEL: ${{ matrix.model }}
+          CHORDS_BUNDLE_MODEL: "0"
+        run: |
+          python build_tools/build_exe.py --skip-pyi
+          Move-Item -LiteralPath "release/Chords.exe" -Destination "release/Chords-${{ matrix.name }}-update.exe" -Force
+          if (-not (Test-Path -LiteralPath "release/Chords-${{ matrix.name }}-update.exe")) { throw "Update EXE was not created" }
+
+      - name: Build lightweight Update Installer
+        shell: pwsh
+        env:
+          CHORDS_INSTALLER_EXE: Chords-${{ matrix.name }}-update.exe
+          CHORDS_INSTALLER_TARGET_EXE: Chords-${{ matrix.name }}.exe
+          CHORDS_INSTALLER_VARIANT: ${{ matrix.name }}
+          CHORDS_INSTALLER_OUTPUT: ChordsEngine-${{ matrix.name }}-Update
+          CHORDS_INSTALLER_MODE: update
+          CHORDS_APP_VERSION: "0.2.0"
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          & $iscc "installer\ChordsEngine.iss"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $installer = "release\ChordsEngine-${{ matrix.name }}-Update.exe"
+          if (-not (Test-Path -LiteralPath $installer)) { throw "Update installer was not created: $installer" }
+          Get-Item -LiteralPath $installer | Select-Object FullName, Length
+
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: Chords-Windows-${{ matrix.name }}
           path: release/Chords-${{ matrix.name }}.exe
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Update Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chords-Windows-${{ matrix.name }}-Update
+          path: release/ChordsEngine-${{ matrix.name }}-Update.exe
           if-no-files-found: error
           retention-days: 14
 
@@ -232,6 +267,41 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-nomodel-Installer
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Tiny Update Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-tiny-Update
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Base Update Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-base-Update
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Small Update Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-small-Update
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download Medium Update Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-medium-Update
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download No Model Update Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-nomodel-Update
           path: release
           run-id: ${{ inputs.release_from_run_id || github.run_id }}
           github-token: ${{ github.token }}
