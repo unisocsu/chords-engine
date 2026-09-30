@@ -88,7 +88,7 @@ def check(force: bool = False) -> dict:
         latest = str(data.get("tag_name") or "").lstrip("vV")
         current = __version__
         variant = _variant()
-        asset_name = f"ChordsEngine-{variant}-Installer.exe" if variant else None
+        asset_name = f"ChordsEngine-{variant}-Update.exe" if variant else None
         asset = next((a for a in data.get("assets", []) if a.get("name") == asset_name), None)
         save_settings({**s, "last_check": time.time()})
         return {
