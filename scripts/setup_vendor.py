@@ -34,6 +34,11 @@ def main() -> None:
         (VENDOR / "whisper").mkdir(parents=True, exist_ok=True)
         zipfile.ZipFile(io.BytesIO(data)).extractall(VENDOR / "whisper")
 
+    bundle_model = os.environ.get("CHORDS_BUNDLE_MODEL", "1") == "1"
+    if not bundle_model:
+        print("Model download skipped (CHORDS_BUNDLE_MODEL=0)")
+        return
+
     MODEL.parent.mkdir(parents=True, exist_ok=True)
     if not MODEL.exists() or MODEL.stat().st_size < 10_000_000:
         print(f"Downloading Whisper model: {MODEL_NAME}")
