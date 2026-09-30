@@ -59,6 +59,11 @@ def _version_tuple(v: str) -> tuple:
 
 
 def _variant() -> str | None:
+    # The launcher passes the edition explicitly because the embedded
+    # Python executable is ChordsApp.exe, not chords-<variant>.exe.
+    env_variant = os.environ.get("CHORDS_VARIANT", "").strip().lower()
+    if env_variant in {"tiny", "base", "small", "medium", "nomodel"}:
+        return env_variant
     name = Path(sys.executable).stem.lower()
     m = re.fullmatch(r"chords-(tiny|base|small|medium|nomodel)", name)
     return m.group(1) if m else None
