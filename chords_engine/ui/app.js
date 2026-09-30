@@ -924,6 +924,102 @@ $("setFont").onchange = () => { S.settings.font = $("setFont").value; saveSettin
 $("setLine").oninput = () => { S.settings.lineH = +$("setLine").value; saveSettings(); };
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySettings);
 
+// ------------------------------------------------------------------ עדכונים
+let updateInfo = null, updatePoll = null;
+
+async function updateSettingsLoad() {
+  if (!native()) {
+    $("updateInfo").textContent = "עדכונים זמינים מתוך גרסת ה-EXE.";
+    return;
+  }
+  const s = await native().update_settings();
+  $("setUpdateEnabled").checked = !!s.enabled;
+  $("setUpdateInterval").value = String(s.interval_hours);
+}
+
+async function saveUpdateSettings() {
+  if (!native()) return;
+  await native().save_update_settings({
+    enabled: $("setUpdateEnabled").checked,
+    interval_hours: +$("setUpdateInterval").value,
+  });
+}
+
+function formatBytes(n) {
+  if (!n) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0, x = n;
+  while (x >= 1024 && i < units.length - 1) { x /= 1024; i++; }
+  return x.toFixed(i ? 1 : 0) + " " + units[i];
+}
+
+function showUpdateDialog(info) {
+  updateInfo = info;
+  $("updateText").textContent = `גרסה חדשה ${info.latest_version} זמינה עבור מהדורת ${info.variant || "התוכנה"}.
+הגרסה הנוכחית: ${info.current_version}. ניתן להוריד עכשיו או לדחות.`;
+  $("dlgUpdate").showModal();
+}
+
+async function checkUpdates(force = false) {
+  if (!native()) return;
+  const result = await native().check_for_updates(force);
+  if (result && result.update) showUpdateDialog(result);
+  else if (force) toast(result && result.error ? "בדיקת העדכון נכשלה: " + result.error : "אין עדכון חדש.");
+}
+
+async function startUpdateDownload() {
+  if (!updateInfo || !native()) return;
+  $("dlgUpdate").close();
+  $("updateProgress").classList.remove("hidden");
+  $("btnCancelUpdate").classList.remove("hidden");
+  $("btnCheckUpdate").disabled = true;
+  const started = await native().start_update_download(updateInfo.asset, updateInfo.latest_version);
+  if (started.state === "error") {
+    toast(started.error || "שגיאה בהתחלת ההורדה", 6000);
+    finishUpdateUi();
+    return;
+  }
+  clearInterval(updatePoll);
+  updatePoll = setInterval(async () => {
+    const s = await native().update_status();
+    $("updateBar").style.width = Math.round((s.progress || 0) * 100) + "%";
+    $("updateInfo").textContent = s.state === "downloading"
+      ? `מוריד עדכון… ${Math.round((s.progress || 0) * 100)}% (${formatBytes(s.downloaded_bytes)} / ${formatBytes(s.total_bytes)})`
+      : "";
+    if (s.state === "ready") {
+      clearInterval(updatePoll);
+      finishUpdateUi();
+      if (await confirmBox("העדכון הורד בהצלחה. להפעיל את המתקין עכשיו? התוכנה תיסגר.")) {
+        const result = await native().install_update();
+        if (!result.ok) toast(result.error || "לא ניתן להפעיל את העדכון", 6000);
+      }
+    } else if (s.state === "cancelled") {
+      clearInterval(updatePoll); finishUpdateUi(); toast("הורדת העדכון בוטלה.");
+    } else if (s.state === "error") {
+      clearInterval(updatePoll); finishUpdateUi(); toast("שגיאה בהורדת העדכון: " + s.error, 7000);
+    }
+  }, 300);
+}
+
+async function cancelUpdateDownload() {
+  if (!native()) return;
+  await native().cancel_update_download();
+}
+
+function finishUpdateUi() {
+  $("btnCancelUpdate").classList.add("hidden");
+  $("btnCheckUpdate").disabled = false;
+  $("updateProgress").classList.add("hidden");
+  $("updateBar").style.width = "0";
+}
+
+$("setUpdateEnabled").onchange = saveUpdateSettings;
+$("setUpdateInterval").onchange = saveUpdateSettings;
+$("btnCheckUpdate").onclick = () => checkUpdates(true);
+$("btnCancelUpdate").onclick = cancelUpdateDownload;
+$("updateDownload").onclick = startUpdateDownload;
+$("updateLater").onclick = () => $("dlgUpdate").close();
+
 // ------------------------------------------------------------------ הפעלה
 async function init() {
   applySettings();
@@ -934,8 +1030,12 @@ async function init() {
   } catch { $("engineState").textContent = "⚠ המנוע לא עונה"; }
   await loadSongs();
   show("library");
+  await updateSettingsLoad();
   pollJobs();
   setInterval(() => fetch("/api/ping").catch(() => { }), 10000);
+  // בדיקה תקופתית; ההגדרה והזמן האחרון נשמרים ב-ProgramData של המשתמש.
+  setTimeout(() => checkUpdates(false), 2500);
+  setInterval(() => checkUpdates(false), 30 * 60 * 1000);
   setRate(1);
 }
 init();
