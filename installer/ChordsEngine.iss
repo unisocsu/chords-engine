@@ -258,7 +258,7 @@ begin
     if FileExists(Target) then
       DeleteFile(Target);
 
-    if not FileCopy(Src, Target, False) then
+    if not CopyFile(Src, Target, False) then
     begin
       MsgBox('העתקת המודל נכשלה.', mbError, MB_OK);
       Abort;
