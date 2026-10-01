@@ -51,7 +51,7 @@ jobs:
             model: ggml-medium-q5_0.bin
             size: "539000000"
             bundle_model: "0"
-          - name: english
+          - name: english-model
             model: ggml-medium.en-q5_0.bin
             size: "539000000"
             bundle_model: "1"
@@ -96,7 +96,6 @@ jobs:
         env:
           CHORDS_MODEL: ${{ matrix.model }}
           CHORDS_BUNDLE_MODEL: ${{ matrix.bundle_model }}
-          CHORDS_UI_LANG: ${{ matrix.name == 'english' && 'en' || 'he' }}
         run: python build_tools/build_exe.py
       - name: Verify PyInstaller output
         shell: pwsh
