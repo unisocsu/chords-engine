@@ -7,7 +7,6 @@ from pathlib import Path
 
 
 def _root() -> Path:
-    # בתוך EXE של PyInstaller התיקייה vendor יושבת ליד קובץ ה-EXE
     if getattr(sys, "frozen", False):
         return Path(sys.executable).parent
     return Path(__file__).resolve().parent.parent
@@ -18,14 +17,17 @@ VENDOR = Path(os.environ.get("CHORDS_VENDOR", ROOT / "vendor"))
 WHISPER_CLI = Path(os.environ.get("CHORDS_WHISPER_CLI", VENDOR / "whisper" / "Release" / "whisper-cli.exe"))
 DATA_DIR = Path(os.environ.get("CHORDS_DATA", Path(os.environ.get("LOCALAPPDATA", Path.home())) / "ChordsEngine"))
 LIBRARY_DIR = DATA_DIR / "library"
-# מודלים: ליד התוכנה (vendor/models) או בתיקיית הנתונים של המשתמש
 MODELS_DIR = Path(os.environ.get("CHORDS_MODELS", VENDOR / "models"))
 if not MODELS_DIR.exists() or not any(MODELS_DIR.glob("*.bin")):
     MODELS_DIR = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "ChordsEngine" / "models"
 MODEL_DIRS = [MODELS_DIR, DATA_DIR / "models"]
 UI_DIR = Path(__file__).resolve().parent / "ui"
 
-DEFAULT_WHISPER_MODEL = "ggml-medium-q5_0.bin"
+UI_LANG = os.environ.get("CHORDS_UI_LANG", "he").lower()
+if UI_LANG not in {"he", "en"}:
+    UI_LANG = "he"
+
+DEFAULT_WHISPER_MODEL = "ggml-medium.en-q5_0.bin" if UI_LANG == "en" else "ggml-medium-q5_0.bin"
 CHORD_VOCABULARIES = {
     "submission": {"name": "רחב — Submission", "description": "אוצר אקורדים רחב לשימוש כללי"},
     "ismir2017": {"name": "בסיסי — ISMIR 2017", "description": "אוצר מצומצם יותר לניתוח יציב ופשוט"},
@@ -33,21 +35,20 @@ CHORD_VOCABULARIES = {
 }
 DEFAULT_PORT = 8765
 
-# ברירות המחדל של ניתוח (ה-UI יכול לשנות כל אחת)
 DEFAULT_ANALYZE_OPTIONS = {
-    "language": "he",            # שפת השירה
+    "language": "en" if UI_LANG == "en" else "he",
     "whisper_model": DEFAULT_WHISPER_MODEL,
-    "accurate_timing": False,    # DTW: תזמון מילים מדויק יותר, בערך +40% זמן
+    "accurate_timing": False,
     "threads": max(1, os.cpu_count() or 4),
-    "vad": False,                # ניסיוני: מהיר פי 2, אבל בבדיקות איבד שורה ראשונה והזיז זמני מילים
-    "separate_vocals": False,    # הפרדת שירה (demucs, אם מותקן) לפני התמלול
-    "chord_vocabulary": "submission",   # submission (~170 אקורדים) | ismir2017 (מז'ור/מינור) | full
-    "min_chord_duration": 0.35,  # אקורדים קצרים מזה מתמזגים לשכן
+    "vad": False,
+    "separate_vocals": False,
+    "chord_vocabulary": "submission",
+    "min_chord_duration": 0.35,
     "snap_to_beats": True,
-    "prompt": "",                # רמז לוויספר: שם השיר, מילים נדירות
-    "lyrics_text": "",           # מילים ידועות: אם הודבקו, הן מיושרות לאודיו במקום התמלול
-    "skip_lyrics": False,        # אקורדים בלבד (מהיר)
-    "folder": "",                # תיקייה בספרייה ("הופעות/2026")
+    "prompt": "",
+    "lyrics_text": "",
+    "skip_lyrics": False,
+    "folder": "",
 }
 
 
@@ -55,7 +56,7 @@ def _model_files(pattern: str) -> list[Path]:
     out = []
     for d in MODEL_DIRS:
         if d.exists():
-            out += [p for p in d.glob(pattern) if p.stat().st_size > 100_000]   # דף חסימה של נטפרי < 2KB
+            out += [p for p in d.glob(pattern) if p.stat().st_size > 100_000]
     return out
 
 
@@ -66,7 +67,6 @@ def whisper_model_path(name: str) -> Path:
     for d in MODEL_DIRS:
         if (d / name).exists():
             return d / name
-    # המודל המבוקש לא קיים — כל מודל עברית אחר שנמצא עדיף על כישלון
     others = [m for m in _model_files("ggml-*.bin") if "silero" not in m.name]
     return others[0] if others else MODELS_DIR / name
 
