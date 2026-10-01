@@ -262,6 +262,13 @@ jobs:
           path: release
           run-id: ${{ inputs.release_from_run_id || github.run_id }}
           github-token: ${{ github.token }}
+      - name: Download English Model
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-english-model
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Download Medium
         uses: actions/download-artifact@v4
         with:
@@ -287,6 +294,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-small-Installer
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download English Model Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-english-model-Installer
           path: release
           run-id: ${{ inputs.release_from_run_id || github.run_id }}
           github-token: ${{ github.token }}
@@ -336,6 +350,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Chords-Windows-medium-Update
+          path: release
+          run-id: ${{ inputs.release_from_run_id || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Download English Model Update Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Chords-Windows-english-model-Update
           path: release
           run-id: ${{ inputs.release_from_run_id || github.run_id }}
           github-token: ${{ github.token }}
