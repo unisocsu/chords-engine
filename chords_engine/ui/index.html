@@ -182,6 +182,9 @@
   <label>רמת ניתוח
     <select id="ytLevel"><option value="fast">⚡ מהיר — אקורדים בלבד</option><option value="normal">⚖️ רגיל — אקורדים ומילים</option><option value="accurate">🎯 מדויק</option></select>
   </label>
+  <label>מודל / אוצר אקורדים
+    <select id="ytChordModel"><option value="submission">🎸 רחב — Submission</option><option value="ismir2017">🎼 בסיסי — ISMIR 2017</option><option value="full">🧠 מלא — Full</option></select>
+  </label>
   <div id="ytStatus" class="muted small"></div>
   <div id="ytProgress" class="progress hidden"><div id="ytBar"></div></div>
   <div class="btns"><button id="ytDownload" class="primary">⬇ הורד ונתח</button><button id="ytCancel">סגירה</button></div>
@@ -196,6 +199,17 @@
   <label><input type="checkbox" id="impAnalyze" checked> להתחיל לנתח מיד</label>
   <p class="muted small">הניתוח רץ ברקע — אפשר להמשיך לעבוד ולנגן. שיר שכבר נותח נפתח מיד.</p>
   <div class="btns"><button id="impGo" class="primary">הוסף</button><button id="impCancel">ביטול</button></div>
+</dialog>
+
+<dialog id="dlgEditChoice">
+  <h2>✏️ מה לערוך?</h2>
+  <p class="muted small">בחר את סוג העריכה.</p>
+  <div class="edit-choice-grid">
+    <button id="editWords" class="edit-choice"><span>📝</span><b>מילים</b><small>עריכת תמלול ושורות</small></button>
+    <button id="editChords" class="edit-choice"><span>🎸</span><b>אקורדים</b><small>החלפה, הוספה והזזה</small></button>
+    <button id="editBoth" class="edit-choice"><span>🛠️</span><b>הכול</b><small>מילים וגם אקורדים</small></button>
+  </div>
+  <div class="btns"><button id="editCancel">ביטול</button></div>
 </dialog>
 
 <dialog id="dlgChord">
