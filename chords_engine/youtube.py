@@ -58,6 +58,15 @@ def _progress(job_id: str, d: dict) -> None:
 
 def _run(job_id: str, url: str, options: dict) -> None:
     try:
+        # NetFree and other HTTPS filtering/proxy setups can install their root CA
+        # in the Windows certificate store instead of Python's bundled certifi store.
+        # truststore makes Python's SSL stack use that system store while keeping
+        # certificate verification enabled.
+        try:
+            import truststore
+            truststore.inject_into_ssl()
+        except ImportError:
+            pass
         import yt_dlp
 
         title = (options.get("title") or "").strip()
