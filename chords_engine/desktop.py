@@ -44,7 +44,7 @@ class _TaskbarProgress:
                 return False
 
             clsid = ctypes.byref((wintypes.BYTE * 16)(
-                0x44, 0xF3, 0x6D, 0x56, 0xD6, 0xFD, 0xD0, 0x11,
+                0x44, 0xF3, 0x6D, 0x56, 0x6D, 0xFD, 0xD0, 0x11,
                 0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90
             ))
             iid = ctypes.byref((wintypes.BYTE * 16)(
@@ -62,8 +62,8 @@ class _TaskbarProgress:
             # then SetProgressState at slot 6 and SetProgressValue at slot 7.
             vtbl = ctypes.cast(ptr, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p))).contents
             self._hr_init = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p)(vtbl[3])
-            self._set_state = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND, ctypes.c_uint)(vtbl[6])
-            self._set_value = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND, ctypes.c_ulonglong, ctypes.c_ulonglong)(vtbl[7])
+            self._set_value = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND, ctypes.c_ulonglong, ctypes.c_ulonglong)(vtbl[9])
+            self._set_state = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND, ctypes.c_uint)(vtbl[10])
             if self._hr_init(ptr) != 0:
                 return False
             self._taskbar = ptr
