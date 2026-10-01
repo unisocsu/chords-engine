@@ -26,6 +26,11 @@ MODEL_DIRS = [MODELS_DIR, DATA_DIR / "models"]
 UI_DIR = Path(__file__).resolve().parent / "ui"
 
 DEFAULT_WHISPER_MODEL = "ggml-medium-q5_0.bin"
+CHORD_VOCABULARIES = {
+    "submission": {"name": "רחב — Submission", "description": "אוצר אקורדים רחב לשימוש כללי"},
+    "ismir2017": {"name": "בסיסי — ISMIR 2017", "description": "אוצר מצומצם יותר לניתוח יציב ופשוט"},
+    "full": {"name": "מלא — Full", "description": "אוצר האקורדים המלא של lv-chordia"},
+}
 DEFAULT_PORT = 8765
 
 # ברירות המחדל של ניתוח (ה-UI יכול לשנות כל אחת)
