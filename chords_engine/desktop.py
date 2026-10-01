@@ -16,6 +16,105 @@ from . import __version__, config
 from . import update
 
 TITLE = "אקורדים"
+TASKBAR_TBPF_NOPROGRESS = 0x0
+TASKBAR_TBPF_INDETERMINATE = 0x1
+TASKBAR_TBPF_NORMAL = 0x2
+TASKBAR_TBPF_ERROR = 0x4
+TASKBAR_TBPF_PAUSED = 0x8
+
+
+class _TaskbarProgress:
+    """Windows 7+ taskbar progress without an extra Python dependency."""
+    def __init__(self):
+        self._taskbar = None
+        self._hwnd = None
+        self._lock = threading.Lock()
+
+    def _ensure(self):
+        if self._taskbar is not None and self._hwnd:
+            return True
+        if os.name != "nt":
+            return False
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            hwnd = ctypes.windll.user32.FindWindowW(None, TITLE)
+            if not hwnd:
+                return False
+
+            clsid = ctypes.byref((wintypes.BYTE * 16)(
+                0x44, 0xF3, 0x6D, 0x56, 0xD6, 0xFD, 0xD0, 0x11,
+                0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90
+            ))
+            iid = ctypes.byref((wintypes.BYTE * 16)(
+                0x91, 0xFB, 0x1A, 0xEA, 0x28, 0x9E, 0x86, 0x4B,
+                0x90, 0xE9, 0x9E, 0x9F, 0x8A, 0x5E, 0xE8, 0xF8
+            ))
+            ole32 = ctypes.windll.ole32
+            ole32.CoInitialize(None)
+            ptr = ctypes.c_void_p()
+            hr = ole32.CoCreateInstance(clsid, None, 1, iid, ctypes.byref(ptr))
+            if hr != 0 or not ptr.value:
+                return False
+
+            # ITaskbarList3 vtable: IUnknown(3), ITaskbarList::HrInit(3),
+            # then SetProgressState at slot 6 and SetProgressValue at slot 7.
+            vtbl = ctypes.cast(ptr, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p))).contents
+            self._hr_init = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p)(vtbl[3])
+            self._set_state = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND, ctypes.c_uint)(vtbl[6])
+            self._set_value = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND, ctypes.c_ulonglong, ctypes.c_ulonglong)(vtbl[7])
+            if self._hr_init(ptr) != 0:
+                return False
+            self._taskbar = ptr
+            self._hwnd = hwnd
+            return True
+        except Exception:
+            return False
+
+    def update(self, state=TASKBAR_TBPF_NOPROGRESS, progress=0.0):
+        with self._lock:
+            if not self._ensure():
+                return
+            try:
+                if state != TASKBAR_TBPF_NOPROGRESS:
+                    self._set_state(self._taskbar, self._hwnd, state)
+                    if state == TASKBAR_TBPF_NORMAL:
+                        value = max(0, min(1000, int(float(progress) * 1000)))
+                        self._set_value(self._taskbar, self._hwnd, value, 1000)
+                else:
+                    self._set_state(self._taskbar, self._hwnd, state)
+            except Exception:
+                self._taskbar = None
+                self._hwnd = None
+
+
+def _start_taskbar_monitor():
+    """Mirror the active analysis job's real progress to the Windows taskbar."""
+    if os.name != "nt":
+        return
+    def monitor():
+        last = None
+        while True:
+            try:
+                from .server import QUEUE
+                active = next((j for j in QUEUE.jobs.values() if j.status == "running"), None)
+                if active:
+                    key = ("running", round(active.progress, 3))
+                    if key != last:
+                        _TASKBAR.update(TASKBAR_TBPF_NORMAL, active.progress)
+                        last = key
+                else:
+                    if last is not None:
+                        _TASKBAR.update(TASKBAR_TBPF_NOPROGRESS)
+                        last = None
+            except Exception:
+                pass
+            time.sleep(0.2)
+    threading.Thread(target=monitor, daemon=True, name="taskbar-progress").start()
+
+
+_TASKBAR = _TaskbarProgress()
 AUDIO_FILTER = ("קבצי שמע ווידאו (*.mp3;*.wav;*.flac;*.m4a;*.aac;*.ogg;*.opus;*.wma;*.mp4;*.mkv;*.webm;*.avi;*.mov)",
                 "כל הקבצים (*.*)")
 
@@ -143,6 +242,7 @@ def main():
             break
         time.sleep(0.1)
     url = f"http://127.0.0.1:{port}/ui/index.html"
+    _start_taskbar_monitor()
     try:
         import webview
         api = Api()
