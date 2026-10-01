@@ -56,10 +56,19 @@ const
   ModelSmallURL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/f281eb45af861ab5e5297d23694b7d0481c77/ggml-small-q5_1.bin';
   ModelSmallSHA256 = 'ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb';
   ModelMediumName = 'ggml-medium-q5_0.bin';
+  ModelTinyEnName = 'ggml-tiny.en-q5_1.bin';
+  ModelBaseEnName = 'ggml-base.en-q5_1.bin';
+  ModelSmallEnName = 'ggml-small.en-q5_1.bin';
+  ModelMediumEnName = 'ggml-medium.en-q5_0.bin';
+  ModelTinyEnURL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin';
+  ModelBaseEnURL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin';
+  ModelSmallEnURL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en-q5_1.bin';
+  ModelMediumEnURL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.en-q5_0.bin';
   ModelMediumURL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/362722b3fdcd2300b58a8286933ead1c48619667/ggml-medium-q5_0.bin';
   ModelMediumSHA256 = '19fea4b380c3a618ec4723c3eef2eb785ffba0d0538cf43f8f235e7b3b34220f';
 
 var
+  ModelLanguagePage: TInputOptionWizardPage;
   ModelChoicePage: TInputOptionWizardPage;
   ModelSourcePage: TInputOptionWizardPage;
   ModelPage: TInputFileWizardPage;
@@ -143,10 +152,19 @@ begin
 
   if (not IsUpdateInstaller) and (('{#Variant}' = 'nomodel') or ('{#Variant}' = 'universal')) then
   begin
-    ModelChoicePage := CreateInputOptionPage(wpSelectDir,
-      'בחירת מודל Whisper',
-      'בחר גודל מודל',
-      'בחר את גודל מודל Whisper שיותקן עם התוכנה.',
+    ModelLanguagePage := CreateInputOptionPage(wpSelectDir,
+      'Whisper model language',
+      'Choose model language',
+      'Choose the language of the Whisper model.',
+      True, False);
+    ModelLanguagePage.Add('עברית — Hebrew');
+    ModelLanguagePage.Add('English — אנגלית');
+    ModelLanguagePage.SelectedValueIndex := 0;
+
+    ModelChoicePage := CreateInputOptionPage(ModelLanguagePage.ID,
+      'Whisper model',
+      'Choose model size',
+      'Choose the Whisper model size.',
       True, False);
     ModelChoicePage.Add('Tiny — כ־32 MB');
     ModelChoicePage.Add('Base — כ־60 MB');
@@ -155,23 +173,23 @@ begin
     ModelChoicePage.SelectedValueIndex := 3;
 
     ModelSourcePage := CreateInputOptionPage(ModelChoicePage.ID,
-      'מקור המודל',
-      'בחר מאיפה לקבל את המודל',
-      'אפשר לבחור קובץ מודל שכבר נמצא במחשב או להוריד את המודל שנבחר מהאינטרנט.',
+      'Model source',
+      'Choose where to get the model',
+      'Choose an existing model file or download the selected model from the internet.',
       True, False);
-    ModelSourcePage.Add('בחר קובץ מהמחשב');
-    ModelSourcePage.Add('הורד מהאינטרנט');
+    ModelSourcePage.Add('Choose a local model file');
+    ModelSourcePage.Add('Download from the internet');
     ModelSourcePage.SelectedValueIndex := 0;
 
     ModelPage := CreateInputFilePage(ModelSourcePage.ID,
-      'בחירת מודל Whisper',
-      'בחר את קובץ מודל Whisper',
-      'בחר קובץ ggml-*.bin. הוא יועתק לתיקיית המודלים של ChordsEngine.');
+      'Choose Whisper model file',
+      'Select a Whisper model file',
+      'Select a ggml-*.bin file. It will be copied to the ChordsEngine models folder.');
     ModelPage.Add('קובץ מודל:', 'קבצי מודל Whisper (*.bin)|*.bin|כל הקבצים (*.*)|*.*', '.bin');
 
     DownloadPage := CreateDownloadPage(
-      'הורדת מודל Whisper',
-      'מוריד את המודל שבחרת. נא להמתין לסיום ההורדה.',
+      'Downloading Whisper model',
+      'Downloading the selected model. Please wait.',
       nil);
     DownloadPage.ShowBaseNameInsteadOfUrl := True;
   end;
@@ -187,8 +205,20 @@ begin
 end;
 
 function SelectedModelInfo(var Name, URL, SHA: string): Boolean;
+var En: Boolean;
 begin
   Result := True;
+  En := Assigned(ModelLanguagePage) and (ModelLanguagePage.SelectedValueIndex = 1);
+  if En then
+  begin
+    case ModelChoicePage.SelectedValueIndex of
+      0: begin Name := ModelTinyEnName; URL := ModelTinyEnURL; SHA := ''; end;
+      1: begin Name := ModelBaseEnName; URL := ModelBaseEnURL; SHA := ''; end;
+      2: begin Name := ModelSmallEnName; URL := ModelSmallEnURL; SHA := ''; end;
+      3: begin Name := ModelMediumEnName; URL := ModelMediumEnURL; SHA := ''; end;
+    else Result := False; end;
+    exit;
+  end;
   case ModelChoicePage.SelectedValueIndex of
     0: begin Name := ModelTinyName; URL := ModelTinyURL; SHA := ModelTinySHA256; end;
     1: begin Name := ModelBaseName; URL := ModelBaseURL; SHA := ModelBaseSHA256; end;
