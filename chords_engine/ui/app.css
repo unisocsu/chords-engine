@@ -198,3 +198,13 @@ table.songs .cover { width: 34px; height: 34px; font-size: 15px; border-radius: 
 /* YouTube / Google import */
 .yt-row{display:flex;gap:8px;align-items:center;margin:12px 0}.yt-row input{flex:1;min-width:0;direction:ltr}.yt-row button{white-space:nowrap}
 #dlgYoutube{min-width:min(760px,90vw)}
+
+.edit-choice-grid { display:grid; grid-template-columns:repeat(3,minmax(130px,1fr)); gap:10px; margin:14px 0; }
+.edit-choice { display:flex; flex-direction:column; align-items:center; gap:5px; padding:16px 10px; min-height:120px; }
+.edit-choice span { font-size:30px; }
+.edit-choice b { font-size:15px; }
+.edit-choice small { color:var(--muted); text-align:center; }
+body[data-edit-mode="lyrics"] .seg .c, body[data-edit-mode="lyrics"] .inst .c { pointer-events:none; opacity:.65; }
+body[data-edit-mode="chords"] .lineops { display:none !important; }
+body[data-edit-mode="chords"] .seg .t { cursor:default; }
+@media (max-width:700px) { .edit-choice-grid { grid-template-columns:1fr; } }
