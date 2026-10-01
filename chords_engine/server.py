@@ -198,6 +198,7 @@ class Handler(BaseHTTPRequestHandler):
             "analyze_defaults": config.DEFAULT_ANALYZE_OPTIONS,
             "view_defaults": render.DEFAULT_VIEW,
             "whisper_models": config.available_models(),
+            "ui_lang": config.UI_LANG,
             "whisper_ready": config.WHISPER_CLI.exists() and bool(config.available_models()),
             "vad_available": config.vad_model_path() is not None,
             "demucs_available": audio.demucs_available(),
