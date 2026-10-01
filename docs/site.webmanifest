@@ -1,0 +1,19 @@
+{
+  "name": "ChordsEngine Windows",
+  "short_name": "ChordsEngine",
+  "description": "ניתוח שירים, מילים ואקורדים ב-Windows",
+  "start_url": "./",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "he",
+  "theme_color": "#080b14",
+  "background_color": "#080b14",
+  "icons": [
+    {
+      "src": "../icon.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
