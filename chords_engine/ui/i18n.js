@@ -22,8 +22,8 @@
   function apply(root=document.body) {
     if (document.documentElement.lang !== "en") return;
     const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT), nodes=[]; while(w.nextNode()) nodes.push(w.currentNode);
-    for(const n of nodes){const v=n.nodeValue.trim(); if(EN[v]) n.nodeValue=n.nodeValue.replace(v,EN[v]);}
-    root.querySelectorAll?.("[title],[placeholder],[aria-label]").forEach(el=>["title","placeholder","aria-label"].forEach(a=>{const v=el.getAttribute(a); if(v&&EN[v]) el.setAttribute(a,EN[v]);}));
+    const keys=Object.keys(EN).sort((a,b)=>b.length-a.length); for(const n of nodes){let v=n.nodeValue; for(const k of keys){if(v.includes(k)) v=v.split(k).join(EN[k]);} n.nodeValue=v;}
+    root.querySelectorAll?.("[title],[placeholder],[aria-label]").forEach(el=>["title","placeholder","aria-label"].forEach(a=>{let v=el.getAttribute(a); if(v&&EN[v]) el.setAttribute(a,EN[v]); else if(v){for(const k of keys){if(v.includes(k)) v=v.split(k).join(EN[k]);} el.setAttribute(a,v);}}));
   }
   fetch("/api/config").then(r=>r.json()).then(cfg=>{
     if(cfg.ui_lang!=="en") return;
