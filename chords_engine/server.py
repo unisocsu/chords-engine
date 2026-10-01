@@ -201,7 +201,7 @@ class Handler(BaseHTTPRequestHandler):
             "whisper_ready": config.WHISPER_CLI.exists() and bool(config.available_models()),
             "vad_available": config.vad_model_path() is not None,
             "demucs_available": audio.demucs_available(),
-            "chord_vocabularies": ["submission", "ismir2017", "full"],
+            "chord_vocabularies": config.CHORD_VOCABULARIES,
             "library_dir": str(config.LIBRARY_DIR),
         })
 
