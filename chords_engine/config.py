@@ -23,9 +23,9 @@ if not MODELS_DIR.exists() or not any(MODELS_DIR.glob("*.bin")):
 MODEL_DIRS = [MODELS_DIR, DATA_DIR / "models"]
 UI_DIR = Path(__file__).resolve().parent / "ui"
 
-UI_LANG = os.environ.get("CHORDS_UI_LANG", "he").lower()
+UI_LANG = os.environ.get("CHORDS_UI_LANG", "en").lower()
 if UI_LANG not in {"he", "en"}:
-    UI_LANG = "he"
+    UI_LANG = "en"
 
 DEFAULT_WHISPER_MODEL = "ggml-medium.en-q5_0.bin" if UI_LANG == "en" else "ggml-medium-q5_0.bin"
 CHORD_VOCABULARIES = {
