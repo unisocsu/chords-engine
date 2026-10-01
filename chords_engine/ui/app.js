@@ -44,10 +44,10 @@ function askText(title, value) {
 const S = {
   cfg: null, songs: [], jobs: [], lyricHits: null,
   view: "library", lib: { kind: "all", value: null, folder: "" },
-  songId: null, song: null, edit: false, undo: [], redo: [], saveTimer: null,
+  songId: null, song: null, edit: false, editMode: null, undo: [], redo: [], saveTimer: null,
   queue: [], qi: -1, shuffle: false, repeat: "off", playingId: null,
   loopA: null, loopB: null, rate: 1, dia: {},
-  settings: Object.assign({ theme: "system", level: "normal", chordColor: "", markColor: "", font: "", lineH: 1.5 }, store.get("settings", {})),
+  settings: Object.assign({ theme: "system", level: "normal", chordVocabulary: "submission", chordColor: "", markColor: "", font: "", lineH: 1.5 }, store.get("settings", {})),
 };
 const media = $("video");
 media.preservesPitch = true;
@@ -207,13 +207,14 @@ function openImport(src) {
   const names = src.paths ? src.paths.map(p => p.split(/[\\/]/).pop()) : src.files.map(f => f.name);
   $("impFiles").textContent = (src.folder ? "תיקייה: " : "") + names.slice(0, 6).join(", ") + (names.length > 6 ? ` ועוד ${names.length - 6}` : "");
   $("impLevel").value = S.settings.level;
+  $("impChordModel").value = S.settings.chordVocabulary || "submission";
   $("impFolder").value = S.lib.kind === "folders" ? S.lib.folder : "";
   $("dlgImport").showModal();
 }
 $("impCancel").onclick = () => $("dlgImport").close();
 $("impGo").onclick = async () => {
   const src = pendingImport; $("dlgImport").close();
-  const options = Object.assign({}, LEVELS[$("impLevel").value]);
+  const options = Object.assign({}, LEVELS[$("impLevel").value], { chord_vocabulary: $("impChordModel").value });
   let paths = src.paths;
   try {
     if (src.files) {
@@ -371,8 +372,9 @@ function renderSheet(el, d, stage) {
   if (!stage) bindSheet(el);
 }
 function lineOps(ln, li) {
-  return `<div class="lineops">${ln.type === "lyric" ? `<button data-op="text" data-li="${li}" title="עריכת טקסט">✎</button><button data-op="merge" data-li="${li}" title="איחוד עם השורה הבאה">⤓</button>` : ""}
-    <button data-op="add" data-li="${li}" title="שורה חדשה אחרי זו">＋</button><button data-op="del" data-li="${li}" title="מחיקת השורה">🗑</button></div>`;
+  const words = S.edit && (S.editMode === "lyrics" || S.editMode === "all");
+  const structure = words;
+  return `<div class="lineops">${ln.type === "lyric" && words ? `<button data-op="text" data-li="${li}" title="עריכת טקסט">✎</button><button data-op="merge" data-li="${li}" title="איחוד עם השורה הבאה">⤓</button>` : ""}${structure ? `<button data-op="add" data-li="${li}" title="שורה חדשה אחרי זו">＋</button><button data-op="del" data-li="${li}" title="מחיקת השורה">🗑</button>` : ""}</div>`;
 }
 function lineHtml(ln, li, mode) {
   if (ln.type === "instrumental") {
@@ -422,7 +424,7 @@ function bindSheet(el) {
   });
   el.querySelectorAll("[data-op]").forEach(b => b.onclick = e => { e.stopPropagation(); lineOp(b.dataset.op, +b.dataset.li); });
   el.onpointerdown = sheetPointerDown;
-  el.ondblclick = e => { if (!S.edit) return; const l = e.target.closest(".line"); if (l && S.song.lines[+l.dataset.li].type === "lyric") lineOp("text", +l.dataset.li); };
+  el.ondblclick = e => { if (!S.edit || (S.editMode !== "lyrics" && S.editMode !== "all")) return; const l = e.target.closest(".line"); if (l && S.song.lines[+l.dataset.li].type === "lyric") lineOp("text", +l.dataset.li); };
 }
 
 // קליק רגיל: קפיצה בנגן. במצב עריכה: לחיצה על אקורד = חלון, גרירה = הזזה, לחיצה על אות = הוספה
@@ -434,11 +436,11 @@ function sheetPointerDown(e) {
     if (t != null && !isNaN(t)) seekSong(t);
     return;
   }
-  if (c) {
+  if (c && (S.editMode === "chords" || S.editMode === "all")) {
     drag = { li: +c.dataset.li, ci: +c.dataset.ci, x: e.clientX, y: e.clientY, el: c, moved: false };
     document.addEventListener("pointermove", dragMove); document.addEventListener("pointerup", dragUp, { once: true });
     e.preventDefault();
-  } else if (w || e.target.closest(".t")) {
+  } else if ((w || e.target.closest(".t")) && (S.editMode === "chords" || S.editMode === "all")) {
     const pos = charFromPoint(e.clientX, e.clientY);
     if (pos) editChord({ li: pos.li, char: pos.char });
   }
@@ -472,12 +474,36 @@ function wordTime(li, wi) { const ln = S.song.lines[li]; return ln && ln.words &
 function wordTimeAtChar(ln, ch) { const w = (ln.words || []).filter(w => w.char <= ch).pop(); return w ? w.start : ln.start; }
 
 // ------------------------------------------------------------------ עריכה
-function setEdit(on) {
-  S.edit = on; document.body.classList.toggle("editing", on);
-  $("btnEdit").classList.toggle("on", on); $("btnEdit").textContent = on ? "✓ סיום עריכה" : "✏️ עריכה";
+function setEdit(on, mode = null) {
+  S.edit = on;
+  S.editMode = on ? (mode || S.editMode || "all") : null;
+  document.body.classList.toggle("editing", on);
+  document.body.dataset.editMode = on ? S.editMode : "";
+  $("btnEdit").classList.toggle("on", on);
+  $("btnEdit").textContent = on ? "✓ סיום עריכה" : "✏️ עריכה";
+  if ($("editHint")) $("editHint").textContent = on ? ({
+    lyrics: "מצב עריכת מילים: לחץ על ✎ או לחץ פעמיים על שורה כדי לערוך את הטקסט.",
+    chords: "מצב עריכת אקורדים: לחץ על אקורד להחלפה, גרור אותו להזזה, או לחץ במקום אחר בשורה כדי להוסיף.",
+    all: "מצב עריכה מלא: אפשר לערוך גם מילים וגם אקורדים."
+  }[S.editMode]) : "";
   if (S.song) renderSheet($("sheet"), S.song, false);
 }
-$("btnEdit").onclick = () => setEdit(!S.edit);
+function chooseEditMode() {
+  return new Promise(resolve => {
+    const d = $("dlgEditChoice");
+    d.showModal();
+    const done = mode => { d.close(); resolve(mode); };
+    $("editWords").onclick = () => done("lyrics");
+    $("editChords").onclick = () => done("chords");
+    $("editBoth").onclick = () => done("all");
+    $("editCancel").onclick = () => done(null);
+  });
+}
+$("btnEdit").onclick = async () => {
+  if (S.edit) return setEdit(false);
+  const mode = await chooseEditMode();
+  if (mode) setEdit(true, mode);
+};
 function snapshot() { return JSON.stringify({ lines: S.song.lines, sections: S.song.sections, view: { transpose: S.v.transpose, capo: S.v.capo } }); }
 function pushUndo() { S.undo.push(snapshot()); if (S.undo.length > 100) S.undo.shift(); S.redo = []; }
 function restore(snap) { const s = JSON.parse(snap); S.song.lines = s.lines; S.song.sections = s.sections; saveNow(s.view); }
@@ -1023,6 +1049,7 @@ $("updateLater").onclick = () => $("dlgUpdate").close();
 // ------------------------------------------------------------------ YouTube / Google
 $("btnYoutube").onclick = () => {
   $("ytLevel").value = S.settings.level;
+  $("ytChordModel").value = S.settings.chordVocabulary || "submission";
   $("ytStatus").textContent = "";
   $("ytProgress").classList.add("hidden");
   $("ytUrl").focus();
@@ -1038,7 +1065,7 @@ let ytPoll = null;
 $("ytDownload").onclick = async () => {
   const url = $("ytUrl").value.trim();
   if (!url) return toast("הדבק קישור YouTube");
-  const options = Object.assign({}, LEVELS[$("ytLevel").value]);
+  const options = Object.assign({}, LEVELS[$("ytLevel").value], { chord_vocabulary: $("ytChordModel").value });
   $("ytDownload").disabled = true;
   $("ytProgress").classList.remove("hidden");
   $("ytStatus").textContent = "מתחיל הורדה…";
