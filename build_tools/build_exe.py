@@ -27,7 +27,7 @@ MODEL = os.environ.get("CHORDS_MODEL", "ggml-medium-q5_0.bin")
 BUNDLE_MODEL = os.environ.get("CHORDS_BUNDLE_MODEL", "1") == "1"
 EXCLUDES = ["matplotlib", "IPython", "jupyter", "notebook", "pytest", "tensorflow", "torchvision", "torchaudio",
             "faster_whisper", "whisper", "ctranslate2", "tkinter", "PyQt5", "PyQt6", "PySide2", "PySide6",
-            "pandas", "demucs", "gradio", "transformers"]
+            "pandas", "demucs", "gradio", "transformers", "numba.np.ufunc.tbbpool"]
 
 
 def step(msg):
@@ -43,7 +43,7 @@ def pyinstaller():
            "--add-data", f"{ROOT / 'chords_engine' / 'ui'}{sep}chords_engine/ui",
            "--add-data", f"{SITE / 'share' / 'lv-chordia' / 'cache_data'}{sep}share/lv-chordia/cache_data",
            "--collect-all", "lv_chordia", "--collect-submodules", "librosa", "--collect-data", "librosa",
-           "--collect-all", "webview", "--collect-all", "yt_dlp", "--hidden-import", "clr", "--hidden-import", "soundfile",
+           "--collect-all", "webview", "--collect-all", "yt_dlp", "--collect-all", "imageio_ffmpeg", "--runtime-hook", str(ROOT / "build_tools" / "ffmpeg_runtime_hook.py"),\n           "--hidden-import", "clr", "--hidden-import", "soundfile",
            "--collect-binaries", "av", "--collect-submodules", "av"]
     if ICON.exists():
         cmd += ["--icon", str(ICON)]
