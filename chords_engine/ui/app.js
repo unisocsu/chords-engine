@@ -50,6 +50,7 @@ const S = {
   settings: Object.assign({ theme: "system", level: "normal", chordVocabulary: "submission", chordColor: "", markColor: "", font: "", lineH: 1.5 }, store.get("settings", {})),
 };
 const media = $("video");
+const IS_ENGLISH = document.documentElement.lang === "en";
 media.preservesPitch = true;
 
 const VIEW_DEFAULTS = { transpose: 0, capo: 0, simplify: "standard", notation: "letters", accidentals: "auto", mode: "above", font: 20 };
