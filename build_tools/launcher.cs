@@ -86,7 +86,10 @@ static class Program {
             Environment.SetEnvironmentVariable("PATH", dir + ";" + Path.Combine(dir, "_internal") + ";" + oldPath);
             string launcherName = Path.GetFileNameWithoutExtension(self).ToLowerInvariant();
             string variant = launcherName.StartsWith("chords-") ? launcherName.Substring("chords-".Length) : "";
-            if (!string.IsNullOrEmpty(variant)) Environment.SetEnvironmentVariable("CHORDS_VARIANT", variant);
+            if (!string.IsNullOrEmpty(variant)) {
+                Environment.SetEnvironmentVariable("CHORDS_VARIANT", variant);
+                if (variant == "english") Environment.SetEnvironmentVariable("CHORDS_UI_LANG", "en");
+            }
             var psi = new ProcessStartInfo(appPath) {
                 WorkingDirectory = dir,
                 UseShellExecute = false
